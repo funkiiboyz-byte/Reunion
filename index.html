@@ -61,7 +61,7 @@
         <div class="join-card">
           <h2>Be Part of the Reunion</h2>
           <p>এখনই রেজিস্ট্রেশন করে তোমার আসন নিশ্চিত করো। Let’s relive our best college memories — together.</p>
-          <form class="join-form" action="#" method="post">
+          <form class="join-form" id="joinForm" action="#" method="post">
             <input type="text" name="name" placeholder="তোমার নাম" required />
             <input type="tel" name="phone" placeholder="মোবাইল নাম্বার" required />
             <select name="group" required>
@@ -73,6 +73,7 @@
             <input type="text" name="profession" placeholder="Current Profession" required />
             <button type="submit" class="btn btn-primary">Confirm Seat</button>
           </form>
+          <p class="form-status" id="formStatus"></p>
         </div>
       </section>
     </main>
@@ -106,6 +107,8 @@
       </div>
 
       <button class="btn btn-primary" id="saveAdmin" type="button">Save Changes</button>
+      <button class="btn btn-ghost" id="downloadRegistrations" type="button">Download Registrations (Excel CSV)</button>
+      <p class="admin-mini" id="registrationsCount">Registrations: --</p>
       <p class="sync-status" id="syncStatus">Sync: local mode</p>
     </aside>
 

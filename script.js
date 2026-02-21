@@ -7,6 +7,11 @@ const logoutAdmin = document.getElementById("logoutAdmin");
 const adminPanel = document.getElementById("adminPanel");
 const syncStatus = document.getElementById("syncStatus");
 
+const joinForm = document.getElementById("joinForm");
+const formStatus = document.getElementById("formStatus");
+const downloadRegistrations = document.getElementById("downloadRegistrations");
+const registrationsCount = document.getElementById("registrationsCount");
+
 const heroTitle = document.getElementById("heroTitle");
 const heroDescription = document.getElementById("heroDescription");
 const registerCta = document.getElementById("registerCta");
@@ -36,6 +41,16 @@ let supabaseClient = null;
 
 function setVisible(el, show) {
   el.style.display = show ? "" : "none";
+}
+
+function setSyncStatus(text, kind = "normal") {
+  syncStatus.textContent = text;
+  syncStatus.dataset.kind = kind;
+}
+
+function setFormStatus(text, kind = "normal") {
+  formStatus.textContent = text;
+  formStatus.dataset.kind = kind;
 }
 
 function collectSettingsFromControls() {
@@ -82,11 +97,6 @@ function setLocalSettings(settings) {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
 
-function setSyncStatus(text, kind = "normal") {
-  syncStatus.textContent = text;
-  syncStatus.dataset.kind = kind;
-}
-
 function setAdminState(isLoggedIn) {
   if (isLoggedIn) {
     adminPanel.classList.add("open");
@@ -112,33 +122,21 @@ function initSupabase() {
 
 async function loadRemoteSettings() {
   if (!supabaseClient) return null;
-
-  const { data, error } = await supabaseClient
-    .from("site_settings")
-    .select("settings")
-    .eq("id", 1)
-    .single();
-
+  const { data, error } = await supabaseClient.from("site_settings").select("settings").eq("id", 1).single();
   if (error) {
     setSyncStatus("Sync: Supabase read failed, using local settings", "error");
     return null;
   }
-
   return data?.settings || null;
 }
 
 async function saveRemoteSettings(settings) {
   if (!supabaseClient) return false;
-
-  const { error } = await supabaseClient
-    .from("site_settings")
-    .upsert({ id: 1, settings }, { onConflict: "id" });
-
+  const { error } = await supabaseClient.from("site_settings").upsert({ id: 1, settings }, { onConflict: "id" });
   if (error) {
     setSyncStatus("Sync: Supabase save failed, local save done", "error");
     return false;
   }
-
   setSyncStatus("Sync: Saved to Supabase + Local", "success");
   return true;
 }
@@ -170,6 +168,81 @@ async function saveSettings() {
   await saveRemoteSettings(settings);
 }
 
+async function submitRegistration(payload) {
+  if (!supabaseClient) {
+    setFormStatus("Supabase unavailable. পরে আবার চেষ্টা করো।", "error");
+    return false;
+  }
+
+  const { error } = await supabaseClient.from("registrations").insert(payload);
+  if (error) {
+    setFormStatus("Registration save হয়নি। table/RLS check করো।", "error");
+    return false;
+  }
+
+  setFormStatus("Registration successful ✅", "success");
+  return true;
+}
+
+function toCsv(rows) {
+  const headers = ["ID", "Name", "Phone", "Group", "Profession", "Created At"];
+  const lines = [headers.join(",")];
+
+  rows.forEach((row) => {
+    const cols = [
+      row.id,
+      row.name,
+      row.phone,
+      row.group_name,
+      row.profession,
+      row.created_at,
+    ].map((v) => `"${String(v ?? "").replaceAll('"', '""')}"`);
+
+    lines.push(cols.join(","));
+  });
+
+  return lines.join("\n");
+}
+
+async function downloadRegistrationsCsv() {
+  if (!supabaseClient) {
+    setSyncStatus("Export failed: Supabase unavailable", "error");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("registrations")
+    .select("id, name, phone, group_name, profession, created_at")
+    .order("id", { ascending: true });
+
+  if (error) {
+    setSyncStatus("Export failed: registrations table access issue", "error");
+    return;
+  }
+
+  registrationsCount.textContent = `Registrations: ${data.length}`;
+
+  const csv = toCsv(data);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `reunion-registrations-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
+  setSyncStatus("Export success: CSV downloaded", "success");
+}
+
+async function refreshRegistrationCount() {
+  if (!supabaseClient) return;
+  const { count, error } = await supabaseClient.from("registrations").select("id", { count: "exact", head: true });
+  if (!error) registrationsCount.textContent = `Registrations: ${count ?? 0}`;
+}
+
 adminBtn.addEventListener("click", () => {
   loginMsg.textContent = "";
   adminDialog.showModal();
@@ -197,10 +270,33 @@ adminLoginForm.addEventListener("submit", (event) => {
   }
 });
 
+joinForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(joinForm);
+
+  const payload = {
+    name: String(formData.get("name") || "").trim(),
+    phone: String(formData.get("phone") || "").trim(),
+    group_name: String(formData.get("group") || "").trim(),
+    profession: String(formData.get("profession") || "").trim(),
+  };
+
+  const ok = await submitRegistration(payload);
+  if (ok) {
+    joinForm.reset();
+    refreshRegistrationCount();
+  }
+});
+
 saveAdmin.addEventListener("click", () => {
   saveSettings();
 });
 
+downloadRegistrations.addEventListener("click", () => {
+  downloadRegistrationsCsv();
+});
+
 initSupabase();
 loadSettings();
+refreshRegistrationCount();
 setAdminState(sessionStorage.getItem(SESSION_KEY) === "true");
