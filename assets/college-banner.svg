@@ -1,0 +1,13 @@
+<svg width="1600" height="520" viewBox="0 0 1600 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1C42"/>
+      <stop offset="1" stop-color="#123A8A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="520" fill="url(#bg)"/>
+  <circle cx="120" cy="90" r="170" fill="#4F8CFF" fill-opacity="0.18"/>
+  <circle cx="1500" cy="440" r="220" fill="#3CC6FF" fill-opacity="0.16"/>
+  <text x="90" y="270" fill="#EAF0FF" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="800">Amla Govt College Kushtia</text>
+  <text x="90" y="330" fill="#9FC1FF" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="600">HSC 2020 Batch Reunion Banner</text>
+</svg>
