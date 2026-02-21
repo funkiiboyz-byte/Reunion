@@ -12,6 +12,7 @@ const joinForm = document.getElementById("joinForm");
 const formStatus = document.getElementById("formStatus");
 const downloadRegistrations = document.getElementById("downloadRegistrations");
 const registrationsCount = document.getElementById("registrationsCount");
+const registrationLiveCount = document.getElementById("registrationLiveCount");
 const registrantsTickerTrack = document.getElementById("registrantsTickerTrack");
 
 const heroTitle = document.getElementById("heroTitle");
@@ -359,14 +360,35 @@ async function downloadRegistrationsCsv() {
 async function refreshRegistrationCount() {
   const localCount = getLocalRegistrations().length;
   if (!supabaseClient) {
-    registrationsCount.textContent = `Registrations: ${localCount}`;
+    const total = localCount;
+    if (registrationsCount) registrationsCount.textContent = `Registrations: ${total}`;
+    if (registrationLiveCount) registrationLiveCount.textContent = String(total);
     return;
   }
 
   const { count, error } = await supabaseClient.from("registrations").select("id", { count: "exact", head: true });
   if (!error) {
-    registrationsCount.textContent = `Registrations: ${(count ?? 0) + localCount}`;
+    const total = (count ?? 0) + localCount;
+    if (registrationsCount) registrationsCount.textContent = `Registrations: ${total}`;
+    if (registrationLiveCount) registrationLiveCount.textContent = String(total);
   }
+}
+
+
+function setupLiveRealtimeSync() {
+  if (!supabaseClient) return;
+
+  supabaseClient
+    .channel("public:registrations-live")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "registrations" },
+      () => {
+        refreshRegistrationCount();
+        refreshRegistrantsTicker();
+      },
+    )
+    .subscribe();
 }
 
 if (adminBtn) adminBtn.addEventListener("click", () => {
@@ -471,4 +493,5 @@ initSupabase();
 loadSettings();
 refreshRegistrationCount();
 refreshRegistrantsTicker();
+setupLiveRealtimeSync();
 setAdminState(sessionStorage.getItem(SESSION_KEY) === "true");
