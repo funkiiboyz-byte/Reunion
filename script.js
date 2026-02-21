@@ -14,8 +14,9 @@ const downloadRegistrations = document.getElementById("downloadRegistrations");
 const registrationsCount = document.getElementById("registrationsCount");
 const registrationLiveCount = document.getElementById("registrationLiveCount");
 const registrantsTickerTrack = document.getElementById("registrantsTickerTrack");
-const successToast = document.getElementById("successToast");
-const successToastText = document.getElementById("successToastText");
+const successDialog = document.getElementById("successDialog");
+const successDialogText = document.getElementById("successDialogText");
+const successDialogClose = document.getElementById("successDialogClose");
 
 const heroTitle = document.getElementById("heroTitle");
 const heroDescription = document.getElementById("heroDescription");
@@ -59,20 +60,12 @@ function setFormStatus(text, kind = "normal") {
   formStatus.dataset.kind = kind;
 }
 
-let successToastTimer = null;
-
-function showSuccessToast(message) {
-  if (!successToast || !successToastText) return;
-  successToastText.textContent = message;
-  successToast.classList.add("show");
-
-  if (successToastTimer) {
-    clearTimeout(successToastTimer);
+function showSuccessPopup(message) {
+  if (!successDialog || !successDialogText) return;
+  successDialogText.textContent = message;
+  if (!successDialog.open) {
+    successDialog.showModal();
   }
-
-  successToastTimer = setTimeout(() => {
-    successToast.classList.remove("show");
-  }, 3500);
 }
 
 function scrollToJoinSection() {
@@ -298,7 +291,7 @@ async function submitRegistration(payload) {
   }
 
   setFormStatus("Registration successful ✅", "success");
-  showSuccessToast("🎉 অভিনন্দন! তোমার seat confirmed হয়েছে। Reunion-এ স্বাগতম!");
+  showSuccessPopup("🎉 অভিনন্দন! তোমার seat confirmed হয়েছে। Reunion-এ স্বাগতম!");
   return true;
 }
 
@@ -415,6 +408,7 @@ if (adminBtn) adminBtn.addEventListener("click", () => {
   adminDialog.showModal();
 });
 if (closeDialog) closeDialog.addEventListener("click", () => adminDialog.close());
+if (successDialogClose) successDialogClose.addEventListener("click", () => successDialog.close());
 
 if (logoutAdmin) logoutAdmin.addEventListener("click", async () => {
   setAdminState(false);
