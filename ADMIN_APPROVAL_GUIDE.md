@@ -64,3 +64,7 @@ Latest update-এ Supabase client auth persistence memory mode এ নেওয়�
 এখন Admin Panel থেকে registration list দেখা যাবে এবং `Remove` button দিয়ে delete করা যাবে।
 এটার জন্য updated `supabase_setup.sql` re-run করো, কারণ নতুন `registrations_delete_admin_only` policy দরকার।
 এই delete permission শুধু approved active authenticated admin email এর জন্য কাজ করবে।
+
+
+## Remove button click UX
+`Remove` click করলে row temporary mark (faded) হয়ে `Removing...` দেখাবে, তারপর success হলে realtime list/count/ticker auto update হবে।

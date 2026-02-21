@@ -440,7 +440,7 @@ function renderAdminRegistrations(rows) {
 
   adminRegistrationsList.innerHTML = rows
     .map((row) => {
-      const id = escapeHtml(String(row.id));
+      const id = String(row.id);
       const name = escapeHtml(row.name || "Unknown");
       const groupLabel = escapeHtml(formatGroupLabel(row.group_name));
       return `<div class="admin-row"><div class="admin-row-info"><div>${name}</div><small>${groupLabel}</small></div><button class="btn btn-danger btn-sm" data-remove-id="${id}" type="button">Remove</button></div>`;
@@ -453,7 +453,13 @@ async function refreshAdminRegistrations() {
   renderAdminRegistrations(rows);
 }
 
-async function removeRegistrationById(id) {
+async function removeRegistrationById(id, rowEl, buttonEl) {
+  if (rowEl) rowEl.classList.add("removing");
+  if (buttonEl) {
+    buttonEl.disabled = true;
+    buttonEl.textContent = "Removing...";
+  }
+
   if (String(id).startsWith("local-")) {
     removeLocalRegistrationById(id);
     setSyncStatus("Local registration removed", "success");
@@ -465,12 +471,23 @@ async function removeRegistrationById(id) {
 
   if (!supabaseClient) {
     setSyncStatus("Supabase unavailable: remove failed", "error");
+    if (rowEl) rowEl.classList.remove("removing");
+    if (buttonEl) {
+      buttonEl.disabled = false;
+      buttonEl.textContent = "Remove";
+    }
     return;
   }
 
-  const { error } = await supabaseClient.from("registrations").delete().eq("id", id);
+  const numericId = Number(id);
+  const { error } = await supabaseClient.from("registrations").delete().eq("id", Number.isNaN(numericId) ? id : numericId);
   if (error) {
     setSyncStatus(`Remove failed (${error.message || "unknown error"})`, "error");
+    if (rowEl) rowEl.classList.remove("removing");
+    if (buttonEl) {
+      buttonEl.disabled = false;
+      buttonEl.textContent = "Remove";
+    }
     return;
   }
 
@@ -577,11 +594,17 @@ if (saveAdmin) saveAdmin.addEventListener("click", async () => {
 
 if (downloadRegistrations) downloadRegistrations.addEventListener("click", () => downloadRegistrationsCsv());
 if (adminRegistrationsList) adminRegistrationsList.addEventListener("click", async (event) => {
-  const target = event.target.closest("[data-remove-id]");
+  const clicked = event.target;
+  if (!(clicked instanceof Element)) return;
+
+  const target = clicked.closest("[data-remove-id]");
   if (!target) return;
+
   const removeId = target.getAttribute("data-remove-id");
   if (!removeId) return;
-  await removeRegistrationById(removeId);
+
+  const rowEl = target.closest(".admin-row");
+  await removeRegistrationById(removeId, rowEl, target);
 });
 if (registerCta) registerCta.addEventListener("click", scrollToJoinSection);
 if (topRegisterBtn) topRegisterBtn.addEventListener("click", scrollToJoinSection);
