@@ -58,3 +58,9 @@ where lower(email)=lower('admin@reunion.com');
 
 ## Chrome LockManager timeout fix
 Latest update-এ Supabase client auth persistence memory mode এ নেওয়া হয়েছে (`persistSession: false`) যাতে Chrome এর `lock:sb-...auth-token` timeout issue কমে। যদি পুরানো tab/cache থেকে error আসে, hard refresh করে আবার login/register try করো।
+
+
+## Fake registration remove from Admin Panel
+এখন Admin Panel থেকে registration list দেখা যাবে এবং `Remove` button দিয়ে delete করা যাবে।
+এটার জন্য updated `supabase_setup.sql` re-run করো, কারণ নতুন `registrations_delete_admin_only` policy দরকার।
+এই delete permission শুধু approved active authenticated admin email এর জন্য কাজ করবে।

@@ -77,6 +77,9 @@ BEGIN
   IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='registrations' AND policyname='registrations_insert_all') THEN
     DROP POLICY registrations_insert_all ON public.registrations;
   END IF;
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='registrations' AND policyname='registrations_delete_admin_only') THEN
+    DROP POLICY registrations_delete_admin_only ON public.registrations;
+  END IF;
 
   IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='admin_approved_emails' AND policyname='admin_approved_emails_self_select') THEN
     DROP POLICY admin_approved_emails_self_select ON public.admin_approved_emails;
@@ -117,6 +120,20 @@ on public.registrations
 for insert
 to anon, authenticated
 with check (true);
+
+
+create policy registrations_delete_admin_only
+on public.registrations
+for delete
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_approved_emails a
+    where lower(a.email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+      and a.is_active = true
+  )
+);
 
 -- Admin approval check policy:
 -- Authenticated user can only read own email row if active=true.

@@ -17,6 +17,7 @@ const registrantsTickerTrack = document.getElementById("registrantsTickerTrack")
 const successDialog = document.getElementById("successDialog");
 const successDialogText = document.getElementById("successDialogText");
 const successDialogClose = document.getElementById("successDialogClose");
+const adminRegistrationsList = document.getElementById("adminRegistrationsList");
 
 const heroTitle = document.getElementById("heroTitle");
 const heroDescription = document.getElementById("heroDescription");
@@ -90,6 +91,11 @@ function saveLocalRegistration(payload) {
     ...payload,
     created_at: new Date().toISOString(),
   });
+  localStorage.setItem(LOCAL_REG_KEY, JSON.stringify(rows));
+}
+
+function removeLocalRegistrationById(id) {
+  const rows = getLocalRegistrations().filter((row) => String(row.id) !== String(id));
   localStorage.setItem(LOCAL_REG_KEY, JSON.stringify(rows));
 }
 
@@ -398,9 +404,80 @@ function setupLiveRealtimeSync() {
       () => {
         refreshRegistrationCount();
         refreshRegistrantsTicker();
+        refreshAdminRegistrations();
       },
     )
     .subscribe();
+}
+
+
+async function fetchAllRegistrations() {
+  const localRows = getLocalRegistrations();
+  if (!supabaseClient) {
+    return localRows.sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+  }
+
+  const { data, error } = await supabaseClient
+    .from("registrations")
+    .select("id, name, group_name, created_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    return localRows.sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+  }
+
+  return [...data, ...localRows].sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+}
+
+function renderAdminRegistrations(rows) {
+  if (!adminRegistrationsList) return;
+
+  if (!rows || rows.length === 0) {
+    adminRegistrationsList.innerHTML = '<p class="admin-empty">No registrations পাওয়া যায়নি।</p>';
+    return;
+  }
+
+  adminRegistrationsList.innerHTML = rows
+    .map((row) => {
+      const id = escapeHtml(String(row.id));
+      const name = escapeHtml(row.name || "Unknown");
+      const groupLabel = escapeHtml(formatGroupLabel(row.group_name));
+      return `<div class="admin-row"><div class="admin-row-info"><div>${name}</div><small>${groupLabel}</small></div><button class="btn btn-danger btn-sm" data-remove-id="${id}" type="button">Remove</button></div>`;
+    })
+    .join("");
+}
+
+async function refreshAdminRegistrations() {
+  const rows = await fetchAllRegistrations();
+  renderAdminRegistrations(rows);
+}
+
+async function removeRegistrationById(id) {
+  if (String(id).startsWith("local-")) {
+    removeLocalRegistrationById(id);
+    setSyncStatus("Local registration removed", "success");
+    await refreshRegistrationCount();
+    await refreshRegistrantsTicker();
+    await refreshAdminRegistrations();
+    return;
+  }
+
+  if (!supabaseClient) {
+    setSyncStatus("Supabase unavailable: remove failed", "error");
+    return;
+  }
+
+  const { error } = await supabaseClient.from("registrations").delete().eq("id", id);
+  if (error) {
+    setSyncStatus(`Remove failed (${error.message || "unknown error"})`, "error");
+    return;
+  }
+
+  setSyncStatus("Registration removed successfully", "success");
+  await refreshRegistrationCount();
+  await refreshRegistrantsTicker();
+  await refreshAdminRegistrations();
 }
 
 if (adminBtn) adminBtn.addEventListener("click", () => {
@@ -485,6 +562,7 @@ if (joinForm) joinForm.addEventListener("submit", async (event) => {
     joinForm.reset();
     refreshRegistrationCount();
     refreshRegistrantsTicker();
+    refreshAdminRegistrations();
   }
 });
 
@@ -498,6 +576,13 @@ if (saveAdmin) saveAdmin.addEventListener("click", async () => {
 });
 
 if (downloadRegistrations) downloadRegistrations.addEventListener("click", () => downloadRegistrationsCsv());
+if (adminRegistrationsList) adminRegistrationsList.addEventListener("click", async (event) => {
+  const target = event.target.closest("[data-remove-id]");
+  if (!target) return;
+  const removeId = target.getAttribute("data-remove-id");
+  if (!removeId) return;
+  await removeRegistrationById(removeId);
+});
 if (registerCta) registerCta.addEventListener("click", scrollToJoinSection);
 if (topRegisterBtn) topRegisterBtn.addEventListener("click", scrollToJoinSection);
 
@@ -506,5 +591,6 @@ initSupabase();
 loadSettings();
 refreshRegistrationCount();
 refreshRegistrantsTicker();
+refreshAdminRegistrations();
 setupLiveRealtimeSync();
 setAdminState(sessionStorage.getItem(SESSION_KEY) === "true");

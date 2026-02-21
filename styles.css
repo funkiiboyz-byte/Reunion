@@ -164,6 +164,35 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
 .sync-status[data-kind="success"] { color: #8df5be; }
 .sync-status[data-kind="error"] { color: #ff9e9e; }
 
+.admin-divider { border: 0; border-top: 1px solid rgba(155, 184, 236, 0.2); margin: 1rem 0 0.7rem; }
+.admin-subtitle { margin: 0 0 0.55rem; font-size: 0.92rem; color: #c9d9ff; }
+.admin-registrations {
+  max-height: 180px;
+  overflow: auto;
+  border: 1px solid rgba(155, 184, 236, 0.2);
+  border-radius: 0.8rem;
+  padding: 0.5rem;
+  background: rgba(8, 16, 34, 0.55);
+}
+.admin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.35rem;
+  border-bottom: 1px dashed rgba(155, 184, 236, 0.18);
+}
+.admin-row:last-child { border-bottom: 0; }
+.admin-row-info { font-size: 0.84rem; color: #dce7ff; }
+.admin-row-info small { color: #9fb2db; }
+.btn-danger {
+  background: rgba(214, 63, 63, 0.2);
+  border-color: rgba(255, 138, 138, 0.35);
+  color: #ffd6d6;
+}
+.btn-danger:hover { background: rgba(214, 63, 63, 0.33); }
+.admin-empty { margin: 0.2rem 0; color: #9fb2db; font-size: 0.84rem; }
+
 .admin-dialog {
   border: 1px solid rgba(155, 184, 236, 0.25);
   border-radius: 1rem;
