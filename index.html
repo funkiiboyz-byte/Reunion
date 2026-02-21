@@ -31,16 +31,16 @@
         <img id="collegeBanner" src="assets/college-banner.svg" alt="Amla Govt College Kushtia banner" />
       </section>
 
-      <section class="hero container">
+      <section class="hero container" id="heroSection">
         <p class="eyebrow">Amla Govt College Kushtia</p>
         <h1 id="heroTitle">HSC 2020 Batch <span>Reunion 2026</span></h1>
-        <p class="hero-text">স্মৃতির ক্যাম্পাসে আবার একসাথে — আমাদের সবার প্রিয় HSC 2020 ব্যাচের জন্য একটি এলিগ্যান্ট, প্রাণবন্ত এবং প্রফেশনাল রিইউনিয়ন আয়োজন।</p>
+        <p class="hero-text" id="heroDescription">স্মৃতির ক্যাম্পাসে আবার একসাথে — আমাদের সবার প্রিয় HSC 2020 ব্যাচের জন্য একটি এলিগ্যান্ট, প্রাণবন্ত এবং প্রফেশনাল রিইউনিয়ন আয়োজন।</p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="#join">Register Now</a>
+          <a class="btn btn-primary" href="#join" id="registerCta">Register Now</a>
           <a class="btn btn-ghost" href="#highlights">Explore Event</a>
         </div>
 
-        <div class="stats-grid">
+        <div class="stats-grid" id="statsSection">
           <article class="stat-card"><p class="stat-number">350+</p><p class="stat-label">Batch Mates</p></article>
           <article class="stat-card"><p class="stat-number">1 Day</p><p class="stat-label">Mega Event</p></article>
           <article class="stat-card"><p class="stat-number">10+</p><p class="stat-label">Fun Segments</p></article>
@@ -49,7 +49,7 @@
       </section>
 
       <section class="highlights container" id="highlights">
-        <h2>Event Highlights</h2>
+        <h2 id="highlightsTitle">Event Highlights</h2>
         <div class="highlight-grid">
           <article class="highlight-card"><h3>Campus Walkthrough</h3><p>পুরোনো ক্লাসরুম, করিডর আর স্মৃতিময় স্পটগুলো ঘুরে দেখা।</p></article>
           <article class="highlight-card"><h3>Cultural Night</h3><p>গান, আড্ডা, পারফরম্যান্স আর ব্যাচমেটদের বিশেষ উপস্থাপনা।</p></article>
@@ -78,21 +78,38 @@
     </main>
 
     <aside class="admin-panel" id="adminPanel" aria-hidden="true">
-      <h3>Admin Control</h3>
-      <p>Hero title, banner image URL, section visibility control.</p>
-      <label>Hero Title</label>
-      <input id="titleControl" type="text" placeholder="Update hero title" />
-      <label>Banner Image URL</label>
+      <div class="admin-panel-top">
+        <h3>Admin Control Panel</h3>
+        <button class="btn btn-ghost btn-sm" id="logoutAdmin" type="button">Logout</button>
+      </div>
+      <p>Login করার পর এখান থেকেই site control করতে পারবে।</p>
+
+      <label for="titleControl">Hero Title</label>
+      <input id="titleControl" type="text" placeholder="HSC 2020 Batch Reunion 2026" />
+
+      <label for="descControl">Hero Description</label>
+      <input id="descControl" type="text" placeholder="Hero description update" />
+
+      <label for="ctaControl">Register CTA Text</label>
+      <input id="ctaControl" type="text" placeholder="Register Now" />
+
+      <label for="bannerControl">Banner Image URL</label>
       <input id="bannerControl" type="url" placeholder="https://... অথবা /assets/..." />
+
+      <label for="highlightsTitleControl">Highlights Section Title</label>
+      <input id="highlightsTitleControl" type="text" placeholder="Event Highlights" />
+
       <div class="toggle-row">
+        <label><input id="toggleStats" type="checkbox" checked /> Stats</label>
         <label><input id="toggleHighlights" type="checkbox" checked /> Highlights</label>
         <label><input id="toggleJoin" type="checkbox" checked /> Registration</label>
       </div>
+
       <button class="btn btn-primary" id="saveAdmin" type="button">Save Changes</button>
     </aside>
 
     <dialog id="adminDialog" class="admin-dialog">
-      <form method="dialog" class="admin-login-form" id="adminLoginForm">
+      <form class="admin-login-form" id="adminLoginForm">
         <h3>Admin Login</h3>
         <p>Demo credential: <strong>admin / hsc2020</strong></p>
         <input type="text" id="adminUser" placeholder="Username" required />
@@ -105,7 +122,7 @@
       </form>
     </dialog>
 
-    <footer class="site-footer container"><p>© 2026 Amla Govt College Kushtia — HSC 2020 Batch Reunion</p></footer>
+    <footer class="site-footer container"><p id="footerText">© 2026 Amla Govt College Kushtia — HSC 2020 Batch Reunion</p></footer>
     <script src="script.js"></script>
   </body>
 </html>

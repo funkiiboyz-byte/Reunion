@@ -47,6 +47,8 @@ body {
 .btn-outline, .btn-ghost, .btn-admin { border-color: rgba(159, 178, 219, 0.35); color: var(--text); background: rgba(13, 26, 54, 0.45); }
 .btn-admin { background: rgba(36, 102, 255, 0.22); }
 
+.btn-sm { padding: 0.35rem 0.75rem; border-radius: 0.6rem; font-size: 0.82rem; }
+
 .banner { margin-top: 0.5rem; }
 .banner img {
   width: 100%;
@@ -108,10 +110,11 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
   display: none;
 }
 .admin-panel.open { display: block; }
-.admin-panel h3 { margin: 0 0 0.4rem; }
+.admin-panel-top { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; margin-bottom: 0.3rem; }
+.admin-panel h3 { margin: 0; }
 .admin-panel p { margin: 0 0 0.8rem; color: var(--muted); font-size: 0.9rem; }
 .admin-panel label { display: block; margin: 0.6rem 0 0.25rem; font-size: 0.9rem; }
-.toggle-row { display: flex; gap: 1rem; margin: 0.8rem 0; }
+.toggle-row { display: flex; gap: 1rem; margin: 0.8rem 0; flex-wrap: wrap; }
 .toggle-row label { margin: 0; }
 
 .admin-dialog {
