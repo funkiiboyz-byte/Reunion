@@ -49,3 +49,8 @@ where lower(email)=lower('admin@reunion.com');
 
 ## Admin change save না হলে
 `supabase_setup.sql` re-run করো। latest policy-তে `site_settings` upsert `anon, authenticated` দুই role-এর জন্য allow করা আছে, তাই admin login অবস্থায়ও save কাজ করবে।
+
+
+## Latest fix notes
+- Page load এ যদি আগে `#join` hash থেকে registration section এ auto jump হতো, এখন সেটা clear করা হয়েছে।
+- Registration save fail হলে data local backup এ save হয়, পরে export CSV তে include হবে।
