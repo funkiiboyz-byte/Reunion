@@ -14,6 +14,8 @@ const downloadRegistrations = document.getElementById("downloadRegistrations");
 const registrationsCount = document.getElementById("registrationsCount");
 const registrationLiveCount = document.getElementById("registrationLiveCount");
 const registrantsTickerTrack = document.getElementById("registrantsTickerTrack");
+const successToast = document.getElementById("successToast");
+const successToastText = document.getElementById("successToastText");
 
 const heroTitle = document.getElementById("heroTitle");
 const heroDescription = document.getElementById("heroDescription");
@@ -55,6 +57,22 @@ function setSyncStatus(text, kind = "normal") {
 function setFormStatus(text, kind = "normal") {
   formStatus.textContent = text;
   formStatus.dataset.kind = kind;
+}
+
+let successToastTimer = null;
+
+function showSuccessToast(message) {
+  if (!successToast || !successToastText) return;
+  successToastText.textContent = message;
+  successToast.classList.add("show");
+
+  if (successToastTimer) {
+    clearTimeout(successToastTimer);
+  }
+
+  successToastTimer = setTimeout(() => {
+    successToast.classList.remove("show");
+  }, 3500);
 }
 
 function scrollToJoinSection() {
@@ -280,6 +298,7 @@ async function submitRegistration(payload) {
   }
 
   setFormStatus("Registration successful ✅", "success");
+  showSuccessToast("🎉 অভিনন্দন! তোমার seat confirmed হয়েছে। Reunion-এ স্বাগতম!");
   return true;
 }
 

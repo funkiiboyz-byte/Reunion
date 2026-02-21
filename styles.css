@@ -185,6 +185,30 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
 
 .site-footer { padding: 2rem 0; text-align: center; color: #7f96c4; font-size: 0.9rem; }
 
+.success-toast {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: min(360px, 92vw);
+  z-index: 120;
+  padding: 0.9rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(141, 245, 190, 0.45);
+  background: linear-gradient(160deg, rgba(10, 45, 33, 0.95), rgba(10, 72, 50, 0.9));
+  color: #dcffe9;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.success-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.success-toast-title { margin: 0; font-size: 1rem; font-weight: 700; }
+.success-toast-text { margin: 0.2rem 0 0; font-size: 0.9rem; color: #c9ffe0; }
+
 @media (max-width: 900px) {
   .nav-links { display: none; }
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -200,5 +224,12 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
     width: auto;
     max-height: 78vh;
     border-radius: 1rem;
+  }
+
+  .success-toast {
+    left: 0.6rem;
+    right: 0.6rem;
+    width: auto;
+    bottom: 0.6rem;
   }
 }
