@@ -3,10 +3,9 @@
 -- Project: reunion (urlfmhgurdrernlpuyjj)
 -- ============================================================
 
--- 0) Extensions
 create extension if not exists pgcrypto;
 
--- 1) Site settings table (admin panel content controls)
+-- 1) Site settings table
 create table if not exists public.site_settings (
   id bigint primary key,
   settings jsonb not null default '{}'::jsonb,
@@ -32,7 +31,7 @@ create trigger trg_site_settings_updated_at
 before update on public.site_settings
 for each row execute function public.set_updated_at();
 
--- 2) Registrations table (who registered)
+-- 2) Registrations table
 create table if not exists public.registrations (
   id bigint generated always as identity primary key,
   name text not null,
@@ -44,7 +43,7 @@ create table if not exists public.registrations (
 
 create index if not exists idx_registrations_created_at on public.registrations (created_at desc);
 
--- 3) Admin approved email list
+-- 3) Approved admin emails
 create table if not exists public.admin_approved_emails (
   id uuid primary key default gen_random_uuid(),
   email text unique not null,
@@ -57,30 +56,12 @@ create table if not exists public.admin_approved_emails (
 create unique index if not exists idx_admin_approved_emails_lower
 on public.admin_approved_emails (lower(email));
 
--- Secure helper function: check if email is approved admin
-create or replace function public.is_admin_email_approved(check_email text)
-returns boolean
-language sql
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.admin_approved_emails a
-    where lower(a.email) = lower(check_email)
-      and a.is_active = true
-  );
-$$;
-
-revoke all on function public.is_admin_email_approved(text) from public;
-grant execute on function public.is_admin_email_approved(text) to anon, authenticated;
-
 -- 4) RLS enable
 alter table public.site_settings enable row level security;
 alter table public.registrations enable row level security;
 alter table public.admin_approved_emails enable row level security;
 
--- Drop old policies if exists
+-- 5) Reset old policies (idempotent)
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='site_settings' AND policyname='site_settings_select_all') THEN
@@ -97,12 +78,21 @@ BEGIN
     DROP POLICY registrations_insert_all ON public.registrations;
   END IF;
 
-  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='admin_approved_emails' AND policyname='admin_approved_emails_no_direct_access') THEN
-    DROP POLICY admin_approved_emails_no_direct_access ON public.admin_approved_emails;
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='admin_approved_emails' AND policyname='admin_approved_emails_self_select') THEN
+    DROP POLICY admin_approved_emails_self_select ON public.admin_approved_emails;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='admin_approved_emails' AND policyname='admin_approved_emails_block_insert') THEN
+    DROP POLICY admin_approved_emails_block_insert ON public.admin_approved_emails;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='admin_approved_emails' AND policyname='admin_approved_emails_block_update') THEN
+    DROP POLICY admin_approved_emails_block_update ON public.admin_approved_emails;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='admin_approved_emails' AND policyname='admin_approved_emails_block_delete') THEN
+    DROP POLICY admin_approved_emails_block_delete ON public.admin_approved_emails;
   END IF;
 END$$;
 
--- prototype-friendly policies for site settings and registrations
+-- prototype-friendly policies
 create policy site_settings_select_all
 on public.site_settings
 for select
@@ -128,20 +118,42 @@ for insert
 to anon
 with check (true);
 
--- no direct table read for admin approved emails from anon/authenticated
-create policy admin_approved_emails_no_direct_access
+-- Admin approval check policy:
+-- Authenticated user can only read own email row if active=true.
+create policy admin_approved_emails_self_select
 on public.admin_approved_emails
-for all
+for select
+to authenticated
+using (
+  is_active = true
+  and lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+);
+
+-- Block client-side write operations
+create policy admin_approved_emails_block_insert
+on public.admin_approved_emails
+for insert
+to anon, authenticated
+with check (false);
+
+create policy admin_approved_emails_block_update
+on public.admin_approved_emails
+for update
 to anon, authenticated
 using (false)
 with check (false);
 
--- 5) Helper SQL for approving an admin email manually (run as needed)
--- replace with your real admin email
+create policy admin_approved_emails_block_delete
+on public.admin_approved_emails
+for delete
+to anon, authenticated
+using (false);
+
+-- 6) Approve one admin email (edit this value)
 insert into public.admin_approved_emails (email, is_active, approved_by)
 values ('your-admin@email.com', true, 'owner')
 on conflict (email)
 do update set is_active = true, approved_at = now();
 
--- Example disable admin
+-- revoke example:
 -- update public.admin_approved_emails set is_active = false where lower(email)=lower('your-admin@email.com');

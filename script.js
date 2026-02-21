@@ -280,10 +280,14 @@ adminLoginForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  const { data: approvalData, error: approvalError } = await supabaseClient
-    .rpc("is_admin_email_approved", { check_email: email });
+  const { data: approvedRows, error: approvalError } = await supabaseClient
+    .from("admin_approved_emails")
+    .select("id, email, is_active")
+    .eq("is_active", true)
+    .ilike("email", email)
+    .limit(1);
 
-  if (approvalError || approvalData !== true) {
+  if (approvalError || !approvedRows || approvedRows.length === 0) {
     await supabaseClient.auth.signOut();
     loginMsg.textContent = "এই email admin হিসেবে approve করা হয়নি।";
     return;
