@@ -62,7 +62,7 @@ function scrollToJoinSection() {
 function clearInitialJoinHash() {
   if (window.location.hash === "#join") {
     history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
-    window.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }
 }
 
@@ -300,18 +300,18 @@ async function refreshRegistrationCount() {
   }
 }
 
-adminBtn.addEventListener("click", () => {
+if (adminBtn) adminBtn.addEventListener("click", () => {
   loginMsg.textContent = "";
   adminDialog.showModal();
 });
-closeDialog.addEventListener("click", () => adminDialog.close());
+if (closeDialog) closeDialog.addEventListener("click", () => adminDialog.close());
 
-logoutAdmin.addEventListener("click", async () => {
+if (logoutAdmin) logoutAdmin.addEventListener("click", async () => {
   setAdminState(false);
   if (supabaseClient) await supabaseClient.auth.signOut();
 });
 
-adminLoginForm.addEventListener("submit", async (event) => {
+if (adminLoginForm) adminLoginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   if (!supabaseClient) {
@@ -347,7 +347,7 @@ adminLoginForm.addEventListener("submit", async (event) => {
   setSyncStatus("Admin verified via approved email", "success");
 });
 
-joinForm.addEventListener("submit", async (event) => {
+if (joinForm) joinForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(joinForm);
   const submitBtn = joinForm.querySelector("button[type='submit']");
@@ -378,7 +378,7 @@ joinForm.addEventListener("submit", async (event) => {
   }
 });
 
-saveAdmin.addEventListener("click", async () => {
+if (saveAdmin) saveAdmin.addEventListener("click", async () => {
   saveAdmin.disabled = true;
   const previousText = saveAdmin.textContent;
   saveAdmin.textContent = "Saving...";
@@ -387,9 +387,9 @@ saveAdmin.addEventListener("click", async () => {
   saveAdmin.textContent = previousText;
 });
 
-downloadRegistrations.addEventListener("click", () => downloadRegistrationsCsv());
-registerCta.addEventListener("click", scrollToJoinSection);
-topRegisterBtn.addEventListener("click", scrollToJoinSection);
+if (downloadRegistrations) downloadRegistrations.addEventListener("click", () => downloadRegistrationsCsv());
+if (registerCta) registerCta.addEventListener("click", scrollToJoinSection);
+if (topRegisterBtn) topRegisterBtn.addEventListener("click", scrollToJoinSection);
 
 clearInitialJoinHash();
 initSupabase();
