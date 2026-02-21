@@ -252,22 +252,47 @@ closeDialog.addEventListener("click", () => {
   adminDialog.close();
 });
 
-logoutAdmin.addEventListener("click", () => {
+logoutAdmin.addEventListener("click", async () => {
   setAdminState(false);
+  if (supabaseClient) {
+    await supabaseClient.auth.signOut();
+  }
 });
 
-adminLoginForm.addEventListener("submit", (event) => {
+adminLoginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const user = document.getElementById("adminUser").value.trim();
+
+  if (!supabaseClient) {
+    loginMsg.textContent = "Supabase unavailable. পরে আবার চেষ্টা করো।";
+    return;
+  }
+
+  const email = document.getElementById("adminEmail").value.trim().toLowerCase();
   const pass = document.getElementById("adminPass").value.trim();
 
-  if (user === "admin" && pass === "hsc2020") {
-    loginMsg.textContent = "";
-    adminDialog.close();
-    setAdminState(true);
-  } else {
-    loginMsg.textContent = "ভুল username/password!";
+  const { error: authError } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password: pass,
+  });
+
+  if (authError) {
+    loginMsg.textContent = "Login failed: email/password ভুল বা user নেই।";
+    return;
   }
+
+  const { data: approvalData, error: approvalError } = await supabaseClient
+    .rpc("is_admin_email_approved", { check_email: email });
+
+  if (approvalError || approvalData !== true) {
+    await supabaseClient.auth.signOut();
+    loginMsg.textContent = "এই email admin হিসেবে approve করা হয়নি।";
+    return;
+  }
+
+  loginMsg.textContent = "";
+  adminDialog.close();
+  setAdminState(true);
+  setSyncStatus("Admin verified via approved email", "success");
 });
 
 joinForm.addEventListener("submit", async (event) => {
