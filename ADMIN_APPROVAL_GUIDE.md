@@ -54,3 +54,7 @@ where lower(email)=lower('admin@reunion.com');
 ## Latest fix notes
 - Page load এ যদি আগে `#join` hash থেকে registration section এ auto jump হতো, এখন সেটা clear করা হয়েছে।
 - Registration save fail হলে data local backup এ save হয়, পরে export CSV তে include হবে।
+
+
+## Chrome LockManager timeout fix
+Latest update-এ Supabase client auth persistence memory mode এ নেওয়া হয়েছে (`persistSession: false`) যাতে Chrome এর `lock:sb-...auth-token` timeout issue কমে। যদি পুরানো tab/cache থেকে error আসে, hard refresh করে আবার login/register try করো।

@@ -141,7 +141,13 @@ function initSupabase() {
     setSyncStatus("Sync: Supabase library load failed, local mode active", "error");
     return;
   }
-  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  });
   setSyncStatus("Sync: Supabase connected", "success");
 }
 
@@ -205,7 +211,11 @@ async function submitRegistration(payload) {
   if (error) {
     saveLocalRegistration(payload);
     const hint = error.message ? ` (${error.message})` : "";
-    setFormStatus(`Supabase save হয়নি, local backup save হয়েছে${hint}`, "error");
+    if (String(error.message || "").includes("LockManager") || String(error.message || "").includes("timed out")) {
+      setFormStatus("Chrome lock timeout: local backup save হয়েছে, refresh দিয়ে আবার try করো।", "error");
+    } else {
+      setFormStatus(`Supabase save হয়নি, local backup save হয়েছে${hint}`, "error");
+    }
     return true;
   }
 
@@ -324,7 +334,12 @@ if (adminLoginForm) adminLoginForm.addEventListener("submit", async (event) => {
 
   const { error: authError } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
   if (authError) {
-    loginMsg.textContent = "Login failed: email/password ভুল বা user নেই।";
+    const message = String(authError.message || "");
+    if (message.includes("LockManager") || message.includes("timed out")) {
+      loginMsg.textContent = "Chrome lock timeout হয়েছে। page refresh করে আবার login দাও।";
+    } else {
+      loginMsg.textContent = "Login failed: email/password ভুল বা user নেই।";
+    }
     return;
   }
 
