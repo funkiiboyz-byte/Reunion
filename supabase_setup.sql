@@ -174,3 +174,33 @@ do update set is_active = true, approved_at = now();
 
 -- revoke example:
 -- update public.admin_approved_emails set is_active = false where lower(email)=lower('your-admin@email.com');
+
+
+-- Admin-safe delete RPC (works even when table RLS policies differ)
+create or replace function public.delete_registration_admin(reg_id bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  is_admin boolean;
+begin
+  select exists (
+    select 1
+    from public.admin_approved_emails a
+    where lower(a.email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+      and a.is_active = true
+  ) into is_admin;
+
+  if not is_admin then
+    return false;
+  end if;
+
+  delete from public.registrations where id = reg_id;
+  return true;
+end;
+$$;
+
+revoke all on function public.delete_registration_admin(bigint) from public;
+grant execute on function public.delete_registration_admin(bigint) to authenticated;

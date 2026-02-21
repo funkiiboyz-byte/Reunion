@@ -480,15 +480,30 @@ async function removeRegistrationById(id, rowEl, buttonEl) {
   }
 
   const numericId = Number(id);
-  const { error } = await supabaseClient.from("registrations").delete().eq("id", Number.isNaN(numericId) ? id : numericId);
-  if (error) {
-    setSyncStatus(`Remove failed (${error.message || "unknown error"})`, "error");
-    if (rowEl) rowEl.classList.remove("removing");
-    if (buttonEl) {
-      buttonEl.disabled = false;
-      buttonEl.textContent = "Remove";
+  const targetId = Number.isNaN(numericId) ? null : numericId;
+
+  let removeError = null;
+
+  if (targetId !== null) {
+    const { data: rpcResult, error: rpcError } = await supabaseClient.rpc("delete_registration_admin", { reg_id: targetId });
+    if (rpcError || rpcResult !== true) {
+      removeError = rpcError || new Error("Admin RPC delete rejected");
     }
-    return;
+  } else {
+    removeError = new Error("Invalid registration id");
+  }
+
+  if (removeError) {
+    const { error: directDeleteError } = await supabaseClient.from("registrations").delete().eq("id", targetId ?? id);
+    if (directDeleteError) {
+      setSyncStatus(`Remove failed (${directDeleteError.message || removeError.message || "unknown error"})`, "error");
+      if (rowEl) rowEl.classList.remove("removing");
+      if (buttonEl) {
+        buttonEl.disabled = false;
+        buttonEl.textContent = "Remove";
+      }
+      return;
+    }
   }
 
   setSyncStatus("Registration removed successfully", "success");

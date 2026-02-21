@@ -68,3 +68,8 @@ Latest update-এ Supabase client auth persistence memory mode এ নেওয়�
 
 ## Remove button click UX
 `Remove` click করলে row temporary mark (faded) হয়ে `Removing...` দেখাবে, তারপর success হলে realtime list/count/ticker auto update হবে।
+
+
+## Remove না হলে (important)
+`Remove` button reliable করার জন্য এখন `delete_registration_admin(reg_id)` RPC ব্যবহার করা হয়। তাই updated `supabase_setup.sql` অবশ্যই re-run করো।
+এই RPC শুধুমাত্র approved active authenticated admin email হলে delete করবে।
