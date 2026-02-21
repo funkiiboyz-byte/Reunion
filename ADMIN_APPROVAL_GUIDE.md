@@ -46,3 +46,6 @@ where lower(email)=lower('admin@reunion.com');
 ## Registration save fix (important)
 যদি আগে registration save না হয়, updated `supabase_setup.sql` আবার run করো।
 এখন `registrations` table insert/select policy `anon, authenticated` দুই role-ই allow করে, তাই admin login অবস্থায়ও registration save হবে।
+
+## Admin change save না হলে
+`supabase_setup.sql` re-run করো। latest policy-তে `site_settings` upsert `anon, authenticated` দুই role-এর জন্য allow করা আছে, তাই admin login অবস্থায়ও save কাজ করবে।

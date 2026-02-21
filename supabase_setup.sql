@@ -102,7 +102,7 @@ using (true);
 create policy site_settings_upsert_all
 on public.site_settings
 for all
-to anon
+to anon, authenticated
 using (true)
 with check (true);
 

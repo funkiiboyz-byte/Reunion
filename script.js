@@ -134,7 +134,8 @@ async function saveRemoteSettings(settings) {
   if (!supabaseClient) return false;
   const { error } = await supabaseClient.from("site_settings").upsert({ id: 1, settings }, { onConflict: "id" });
   if (error) {
-    setSyncStatus("Sync: Supabase save failed, local save done", "error");
+    const hint = error.message ? ` (${error.message})` : "";
+    setSyncStatus(`Sync: Supabase save failed, local save done${hint}`, "error");
     return false;
   }
   setSyncStatus("Sync: Saved to Supabase + Local", "success");
@@ -331,8 +332,13 @@ joinForm.addEventListener("submit", async (event) => {
   }
 });
 
-saveAdmin.addEventListener("click", () => {
-  saveSettings();
+saveAdmin.addEventListener("click", async () => {
+  saveAdmin.disabled = true;
+  const previousText = saveAdmin.textContent;
+  saveAdmin.textContent = "Saving...";
+  await saveSettings();
+  saveAdmin.disabled = false;
+  saveAdmin.textContent = previousText;
 });
 
 downloadRegistrations.addEventListener("click", () => {

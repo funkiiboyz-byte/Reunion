@@ -125,6 +125,7 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
 .admin-panel h3 { margin: 0; }
 .admin-panel p { margin: 0 0 0.8rem; color: var(--muted); font-size: 0.9rem; }
 .admin-panel label { display: block; margin: 0.6rem 0 0.25rem; font-size: 0.9rem; }
+.admin-panel .btn:disabled { opacity: 0.72; cursor: not-allowed; }
 .toggle-row { display: flex; gap: 1rem; margin: 0.8rem 0; flex-wrap: wrap; }
 .toggle-row label { margin: 0; }
 
