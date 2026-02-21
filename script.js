@@ -12,6 +12,7 @@ const joinForm = document.getElementById("joinForm");
 const formStatus = document.getElementById("formStatus");
 const downloadRegistrations = document.getElementById("downloadRegistrations");
 const registrationsCount = document.getElementById("registrationsCount");
+const registrantsTickerTrack = document.getElementById("registrantsTickerTrack");
 
 const heroTitle = document.getElementById("heroTitle");
 const heroDescription = document.getElementById("heroDescription");
@@ -78,6 +79,64 @@ function saveLocalRegistration(payload) {
     created_at: new Date().toISOString(),
   });
   localStorage.setItem(LOCAL_REG_KEY, JSON.stringify(rows));
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function formatGroupLabel(groupName) {
+  const key = String(groupName || "").toLowerCase();
+  if (key === "science") return "Science";
+  if (key === "humanities") return "Humanities";
+  if (key === "business") return "Business";
+  return groupName || "Group";
+}
+
+function renderRegistrantsTicker(rows) {
+  if (!registrantsTickerTrack) return;
+
+  if (!rows || rows.length === 0) {
+    registrantsTickerTrack.innerHTML = '<span class="marquee-item">No registrations yet</span>';
+    return;
+  }
+
+  const items = rows
+    .map((row) => `<span class="marquee-item">${escapeHtml(row.name)} • ${escapeHtml(formatGroupLabel(row.group_name))}</span>`)
+    .join("");
+
+  registrantsTickerTrack.innerHTML = `${items}${items}`;
+}
+
+async function refreshRegistrantsTicker() {
+  const localRows = getLocalRegistrations();
+
+  if (!supabaseClient) {
+    renderRegistrantsTicker(localRows.slice(-25));
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("registrations")
+    .select("name, group_name, created_at")
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  if (error) {
+    renderRegistrantsTicker(localRows.slice(-25));
+    return;
+  }
+
+  const merged = [...data, ...localRows]
+    .sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")))
+    .slice(0, 30);
+
+  renderRegistrantsTicker(merged);
 }
 
 function collectSettingsFromControls() {
@@ -390,6 +449,7 @@ if (joinForm) joinForm.addEventListener("submit", async (event) => {
   if (ok) {
     joinForm.reset();
     refreshRegistrationCount();
+    refreshRegistrantsTicker();
   }
 });
 
@@ -410,4 +470,5 @@ clearInitialJoinHash();
 initSupabase();
 loadSettings();
 refreshRegistrationCount();
+refreshRegistrantsTicker();
 setAdminState(sessionStorage.getItem(SESSION_KEY) === "true");

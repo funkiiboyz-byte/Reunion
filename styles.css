@@ -79,6 +79,37 @@ h1 span { color: #9fc1ff; }
 .stat-label { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.92rem; }
 
 .highlights, .join { padding: 2rem 0; }
+
+.registrants-marquee { padding: 0.2rem 0 1.4rem; }
+.marquee-title { margin: 0 0 0.45rem; color: #a8b9e3; font-size: 0.9rem; font-weight: 600; }
+.marquee-shell {
+  overflow: hidden;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(155, 184, 236, 0.2);
+  background: rgba(11, 24, 50, 0.78);
+}
+.marquee-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+  padding: 0.72rem 0;
+  animation: marqueeMove 25s linear infinite;
+  will-change: transform;
+}
+.marquee-item {
+  display: inline-block;
+  font-size: 0.88rem;
+  color: #d6e2ff;
+  background: rgba(21, 43, 83, 0.85);
+  border: 1px solid rgba(156, 187, 244, 0.25);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+}
+@keyframes marqueeMove {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
 h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
 .highlight-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .highlight-card { padding: 1.2rem; }
