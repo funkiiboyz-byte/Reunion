@@ -96,7 +96,7 @@ END$$;
 create policy site_settings_select_all
 on public.site_settings
 for select
-to anon
+to anon, authenticated
 using (true);
 
 create policy site_settings_upsert_all
@@ -109,13 +109,13 @@ with check (true);
 create policy registrations_select_all
 on public.registrations
 for select
-to anon
+to anon, authenticated
 using (true);
 
 create policy registrations_insert_all
 on public.registrations
 for insert
-to anon
+to anon, authenticated
 with check (true);
 
 -- Admin approval check policy:

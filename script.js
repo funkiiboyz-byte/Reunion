@@ -176,7 +176,8 @@ async function submitRegistration(payload) {
 
   const { error } = await supabaseClient.from("registrations").insert(payload);
   if (error) {
-    setFormStatus("Registration save হয়নি। table/RLS check করো।", "error");
+    const hint = error.message ? ` (${error.message})` : "";
+    setFormStatus(`Registration save হয়নি। table/RLS check করো${hint}`, "error");
     return false;
   }
 
@@ -302,6 +303,7 @@ adminLoginForm.addEventListener("submit", async (event) => {
 joinForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(joinForm);
+  const submitBtn = joinForm.querySelector("button[type='submit']");
 
   const payload = {
     name: String(formData.get("name") || "").trim(),
@@ -310,7 +312,19 @@ joinForm.addEventListener("submit", async (event) => {
     profession: String(formData.get("profession") || "").trim(),
   };
 
+  setFormStatus("Saving registration...", "normal");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Saving...";
+  }
+
   const ok = await submitRegistration(payload);
+
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Confirm Seat";
+  }
+
   if (ok) {
     joinForm.reset();
     refreshRegistrationCount();

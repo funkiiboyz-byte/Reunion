@@ -46,6 +46,7 @@ body {
 .btn-primary:hover { transform: translateY(-1px); }
 .btn-outline, .btn-ghost, .btn-admin { border-color: rgba(159, 178, 219, 0.35); color: var(--text); background: rgba(13, 26, 54, 0.45); }
 .btn-admin { background: rgba(36, 102, 255, 0.22); }
+.btn-admin:hover { background: rgba(59, 122, 255, 0.35); }
 
 .btn-sm { padding: 0.35rem 0.75rem; border-radius: 0.6rem; font-size: 0.82rem; }
 
@@ -95,6 +96,7 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
   border-radius: 0.75rem;
 }
 .join-form button { grid-column: span 3; }
+.join-form button:disabled { opacity: 0.72; cursor: not-allowed; }
 
 .form-status { margin: 0.7rem 0 0; font-size: 0.9rem; min-height: 1.1rem; color: var(--muted); }
 .form-status[data-kind="success"] { color: #8df5be; }
@@ -109,10 +111,14 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
   position: fixed;
   right: 1rem;
   top: 5rem;
-  width: min(360px, 92vw);
+  width: min(390px, 94vw);
+  max-height: calc(100vh - 6rem);
+  overflow: auto;
   padding: 1rem;
   z-index: 100;
   display: none;
+  box-shadow: 0 20px 40px rgba(2, 9, 24, 0.55);
+  border: 1px solid rgba(129, 164, 231, 0.28);
 }
 .admin-panel.open { display: block; }
 .admin-panel-top { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; margin-bottom: 0.3rem; }
@@ -153,4 +159,14 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
   .highlight-grid { grid-template-columns: 1fr; }
   .join-form { grid-template-columns: 1fr; }
   .join-form button { grid-column: auto; }
+
+  .admin-panel {
+    left: 0.6rem;
+    right: 0.6rem;
+    top: auto;
+    bottom: 0.7rem;
+    width: auto;
+    max-height: 78vh;
+    border-radius: 1rem;
+  }
 }

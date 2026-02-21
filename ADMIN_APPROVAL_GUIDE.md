@@ -41,3 +41,8 @@ where lower(email)=lower('admin@reunion.com');
 এই প্রজেক্ট এখনো prototype mode:
 - `site_settings` এবং `registrations` এ permissive anon policy আছে.
 - production এ admin operations backend/API route দিয়ে করা best.
+
+
+## Registration save fix (important)
+যদি আগে registration save না হয়, updated `supabase_setup.sql` আবার run করো।
+এখন `registrations` table insert/select policy `anon, authenticated` দুই role-ই allow করে, তাই admin login অবস্থায়ও registration save হবে।
