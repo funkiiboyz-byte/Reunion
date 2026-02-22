@@ -15,6 +15,7 @@ const registrationsCount = document.getElementById("registrationsCount");
 const registrationLiveCount = document.getElementById("registrationLiveCount");
 const registrantsTickerTrack = document.getElementById("registrantsTickerTrack");
 const successDialog = document.getElementById("successDialog");
+const successDialogTitle = document.getElementById("successDialogTitle");
 const successDialogText = document.getElementById("successDialogText");
 const successDialogClose = document.getElementById("successDialogClose");
 const adminRegistrationsList = document.getElementById("adminRegistrationsList");
@@ -69,8 +70,10 @@ function setFormStatus(text, kind = "normal") {
   formStatus.dataset.kind = kind;
 }
 
-function showSuccessPopup(message) {
+function showSuccessPopup(name, message) {
   if (!successDialog || !successDialogText) return;
+  const safeName = String(name || "বন্ধু").trim();
+  if (successDialogTitle) successDialogTitle.textContent = `🎉 অভিনন্দন, ${safeName}!`;
   successDialogText.textContent = message;
   if (!successDialog.open) {
     successDialog.showModal();
@@ -542,6 +545,7 @@ async function submitRegistration(payload) {
   if (!supabaseClient) {
     saveLocalRegistration(payload);
     setFormStatus("Supabase unavailable. Local backup save হয়েছে।", "success");
+    showSuccessPopup(payload.name, "তোমার registration নেওয়া হয়েছে (local backup mode)। Reunion-এ স্বাগতম!");
     return true;
   }
 
@@ -562,7 +566,7 @@ async function submitRegistration(payload) {
   }
 
   setFormStatus("Registration successful ✅", "success");
-  showSuccessPopup("🎉 অভিনন্দন! তোমার seat confirmed হয়েছে। Reunion-এ স্বাগতম!");
+  showSuccessPopup(payload.name, "তোমার seat successfully confirmed হয়েছে। Reunion-এ দেখা হবে!");
   return true;
 }
 

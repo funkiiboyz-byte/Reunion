@@ -294,9 +294,28 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
   background: rgba(3, 8, 20, 0.6);
   backdrop-filter: blur(2px);
 }
-.success-dialog-card { padding: 1rem; }
-.success-dialog-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #b9ffd9; }
-.success-dialog-text { margin: 0.5rem 0 1rem; color: #d5ffea; }
+.success-dialog-card {
+  padding: 1.2rem;
+  border-radius: 1rem;
+  background: radial-gradient(circle at top right, rgba(96, 182, 255, 0.16), transparent 45%), rgba(10, 24, 50, 0.92);
+  border: 1px solid rgba(141, 214, 173, 0.25);
+  box-shadow: 0 16px 36px rgba(3, 10, 24, 0.5);
+}
+.success-dialog-badge {
+  margin: 0;
+  display: inline-block;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #9ee7c3;
+  background: rgba(67, 167, 120, 0.18);
+  border: 1px solid rgba(113, 226, 167, 0.32);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+.success-dialog-title { margin: 0.65rem 0 0.25rem; font-size: 1.22rem; font-weight: 800; color: #d4ffe8; }
+.success-dialog-text { margin: 0.45rem 0 1rem; color: #dcffef; line-height: 1.55; }
 
 @media (max-width: 900px) {
   .nav-links { display: none; }
