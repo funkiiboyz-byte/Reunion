@@ -34,6 +34,7 @@ const descControl = document.getElementById("descControl");
 const ctaControl = document.getElementById("ctaControl");
 const bannerControl = document.getElementById("bannerControl");
 const bannerImagesControl = document.getElementById("bannerImagesControl");
+const bannerUploadControl = document.getElementById("bannerUploadControl");
 const highlightsTitleControl = document.getElementById("highlightsTitleControl");
 const toggleStats = document.getElementById("toggleStats");
 const toggleHighlights = document.getElementById("toggleHighlights");
@@ -133,6 +134,48 @@ function updateBannerImagesFromSettings(settings) {
     bannerImages = [collegeBanner.getAttribute("src") || "assets/college-banner.svg"];
   }
   startBannerSlider();
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Unable to read image file"));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleBannerFileUploads(fileList) {
+  const files = Array.from(fileList || []).filter((file) => String(file.type || "").startsWith("image/"));
+  if (files.length === 0) {
+    setSyncStatus("Please select valid image files", "error");
+    return;
+  }
+
+  const maxFiles = 10;
+  const selected = files.slice(0, maxFiles);
+
+  try {
+    const dataUrls = await Promise.all(selected.map((file) => readFileAsDataUrl(file)));
+    const current = normalizeBannerImagesFromText(bannerImagesControl.value);
+    const merged = [...current, ...dataUrls];
+    bannerImagesControl.value = merged.join("\n");
+
+    const settings = collectSettingsFromControls();
+    applySettings(settings);
+    setLocalSettings(settings);
+    if (supabaseClient) {
+      await saveRemoteSettings(settings);
+    } else {
+      setSyncStatus("Uploaded locally (Supabase unavailable)", "error");
+    }
+
+    setSyncStatus(`Added ${dataUrls.length} image(s) to banner slider`, "success");
+  } catch (error) {
+    setSyncStatus(`Image upload failed (${error.message || "unknown error"})`, "error");
+  } finally {
+    if (bannerUploadControl) bannerUploadControl.value = "";
+  }
 }
 
 function getLocalRegistrations() {
@@ -696,6 +739,12 @@ if (document) {
     startBannerSlider();
   });
 }
+
+if (bannerUploadControl) bannerUploadControl.addEventListener("change", async (event) => {
+  const input = event.target;
+  if (!(input instanceof HTMLInputElement) || !input.files) return;
+  await handleBannerFileUploads(input.files);
+});
 
 clearInitialJoinHash();
 initSupabase();
