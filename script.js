@@ -33,8 +33,6 @@ const highlightsTitle = document.getElementById("highlightsTitle");
 const titleControl = document.getElementById("titleControl");
 const descControl = document.getElementById("descControl");
 const ctaControl = document.getElementById("ctaControl");
-const bannerControl = document.getElementById("bannerControl");
-const bannerImagesControl = document.getElementById("bannerImagesControl");
 const bannerUploadControl = document.getElementById("bannerUploadControl");
 const bannerUploadsList = document.getElementById("bannerUploadsList");
 const highlightsTitleControl = document.getElementById("highlightsTitleControl");
@@ -149,13 +147,12 @@ function startBannerSlider() {
 }
 
 function updateBannerImagesFromSettings(settings) {
-  const parsed = normalizeBannerImagesFromText(settings.bannerImagesText || "");
-  const merged = [...parsed, ...uploadedBannerImages.map((row) => row.image_data)].filter(Boolean);
+  const legacyText = String(settings?.bannerImagesText || "");
+  const parsed = normalizeBannerImagesFromText(legacyText);
+  const merged = [...uploadedBannerImages.map((row) => row.image_data), ...parsed].filter(Boolean);
 
   if (merged.length > 0) {
     bannerImages = Array.from(new Set(merged));
-  } else if (settings.bannerSrc) {
-    bannerImages = [settings.bannerSrc];
   } else {
     bannerImages = [collegeBanner.getAttribute("src") || "assets/college-banner.svg"];
   }
@@ -236,7 +233,7 @@ function renderBannerUploadsList() {
     .map((row, index) => {
       const id = String(row.id || "");
       const shortLabel = row.source === "local" ? `Local upload #${index + 1}` : `DB image #${id}`;
-      return `<div class="banner-upload-row"><span class="banner-upload-info">${escapeHtml(shortLabel)}</span><button class="btn btn-danger btn-sm" data-remove-banner-id="${escapeHtml(id)}" type="button">Remove</button></div>`;
+      return `<div class="banner-upload-row"><div class="banner-upload-preview"><img src="${escapeHtml(row.image_data)}" alt="${escapeHtml(shortLabel)}" loading="lazy" decoding="async" /></div><span class="banner-upload-info">${escapeHtml(shortLabel)}</span><button class="btn btn-danger btn-sm" data-remove-banner-id="${escapeHtml(id)}" type="button">Remove</button></div>`;
     })
     .join("");
 }
@@ -400,8 +397,6 @@ function collectSettingsFromControls() {
     heroTitle: titleControl.value.trim() || heroTitle.innerHTML,
     heroDescription: descControl.value.trim() || heroDescription.textContent,
     ctaText: ctaControl.value.trim() || registerCta.textContent,
-    bannerSrc: bannerControl.value.trim() || collegeBanner.getAttribute("src"),
-    bannerImagesText: bannerImagesControl.value.trim(),
     highlightsTitle: highlightsTitleControl.value.trim() || highlightsTitle.textContent,
     showStats: toggleStats.checked,
     showHighlights: toggleHighlights.checked,
@@ -413,7 +408,6 @@ function applySettings(settings) {
   if (settings.heroTitle) heroTitle.innerHTML = settings.heroTitle;
   if (settings.heroDescription) heroDescription.textContent = settings.heroDescription;
   if (settings.ctaText) registerCta.textContent = settings.ctaText;
-  if (settings.bannerSrc) collegeBanner.src = settings.bannerSrc;
   updateBannerImagesFromSettings(settings);
   if (settings.highlightsTitle) highlightsTitle.textContent = settings.highlightsTitle;
 
@@ -426,8 +420,6 @@ function hydrateControls(settings = {}) {
   titleControl.value = settings.heroTitle || heroTitle.innerHTML;
   descControl.value = settings.heroDescription || heroDescription.textContent;
   ctaControl.value = settings.ctaText || registerCta.textContent;
-  bannerControl.value = settings.bannerSrc || collegeBanner.getAttribute("src") || "";
-  bannerImagesControl.value = settings.bannerImagesText || bannerImages.join("\n");
   highlightsTitleControl.value = settings.highlightsTitle || highlightsTitle.textContent;
   toggleStats.checked = settings.showStats !== false;
   toggleHighlights.checked = settings.showHighlights !== false;
@@ -610,7 +602,7 @@ async function downloadRegistrationsCsv() {
 
   const { data, error } = await supabaseClient
     .from("registrations")
-    .select("id, name, phone, group_name, profession, created_at")
+    .select("id, name, phone, group_name, profession, comment, created_at")
     .order("id", { ascending: true });
 
   if (error) {

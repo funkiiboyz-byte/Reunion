@@ -84,11 +84,10 @@ alter table public.registrations add column if not exists comment text;
 
 
 ## Banner slider images from Admin Panel
-Admin panel-এ `Banner Images (one URL per line)` field এ multiple image URL বসালে banner auto-slide করবে (line break বা comma-separated দুইভাবেই paste করা যাবে)।
-পুরানো single `Banner Image URL` field fallback হিসেবে থাকবে (blank list হলে সেটাই ব্যবহার হবে)।
-- PC থেকে সরাসরি image upload করতে চাইলে `Upload Banner Images (from your PC)` field থেকে multiple image select করো; image গুলো `banner_images` table-এ save হবে এবং slider-এ auto-load হবে।
+Admin panel-এ এখন URL field নেই, তাই banner manage করতে শুধু `Upload Banner Images (from your PC)` ব্যবহার করো।
+- Upload করা image গুলো `banner_images` table-এ save হবে এবং slider-এ auto-load হবে।
+- `Uploaded Banner Images` list-এ thumbnail preview দেখা যাবে।
 - এটা কাজ করানোর জন্য latest `supabase_setup.sql` অবশ্যই re-run করো (নতুন `banner_images` table + policy add হয়েছে)।
-
 
 ## Banner image remove (Admin)
 Admin panel-এ `Uploaded Banner Images` list-এ প্রতিটি image row-র পাশে `Remove` button আছে।
@@ -102,3 +101,5 @@ Admin panel-এ `Uploaded Banner Images` list-এ প্রতিটি image ro
 
 ## Banner image load performance
 Banner images এখন preload করা হয় এবং hero banner image eager load/fetchpriority high দেওয়া আছে, ফলে প্রথম load আগের তুলনায় দ্রুত দেখাবে।
+
+CSV download এ `comment` column include করা হয়েছে, তাই export file এ মন্তব্য data থাকবে।
