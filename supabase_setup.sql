@@ -42,6 +42,7 @@ create table if not exists public.registrations (
 );
 
 create index if not exists idx_registrations_created_at on public.registrations (created_at desc);
+create unique index if not exists idx_registrations_phone_unique_normalized on public.registrations ((regexp_replace(phone, '[^0-9+]', '', 'g')));
 
 -- Safe schema upgrade: add optional comment field without touching old data
 alter table public.registrations add column if not exists comment text;

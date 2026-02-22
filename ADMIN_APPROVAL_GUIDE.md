@@ -95,3 +95,10 @@ Admin panel-এ `Uploaded Banner Images` list-এ প্রতিটি image ro
 - DB image হলে `banner_images` table থেকে delete হবে (approved active admin login দরকার)।
 - Supabase unavailable/local mode হলে local upload list থেকে remove হবে।
 
+
+
+## Duplicate phone registration block
+একই phone number দিয়ে duplicate registration এখন block করা হয়েছে। client-side check আছে, আর DB level-এ normalized phone unique index add আছে। তাই latest `supabase_setup.sql` re-run করা জরুরি।
+
+## Banner image load performance
+Banner images এখন preload করা হয় এবং hero banner image eager load/fetchpriority high দেওয়া আছে, ফলে প্রথম load আগের তুলনায় দ্রুত দেখাবে।

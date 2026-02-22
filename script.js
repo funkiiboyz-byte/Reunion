@@ -105,6 +105,21 @@ function normalizeBannerImagesFromText(text) {
   );
 }
 
+function normalizePhone(phone) {
+  return String(phone || "").replace(/[^0-9+]/g, "");
+}
+
+function preloadBannerImages(urls) {
+  const list = Array.isArray(urls) ? urls : [];
+  list.forEach((src) => {
+    const value = String(src || "").trim();
+    if (!value) return;
+    const img = new Image();
+    img.decoding = "async";
+    img.src = value;
+  });
+}
+
 function startBannerSlider() {
   if (!collegeBanner || !collegeBannerSecondary) return;
   if (bannerSlideTimer) clearInterval(bannerSlideTimer);
@@ -115,6 +130,7 @@ function startBannerSlider() {
 
   bannerSlideIndex = 0;
   collegeBanner.src = bannerImages[0];
+  collegeBannerSecondary.src = bannerImages[0];
   collegeBanner.classList.add("is-active");
   collegeBannerSecondary.classList.remove("is-active");
 
@@ -143,6 +159,7 @@ function updateBannerImagesFromSettings(settings) {
   } else {
     bannerImages = [collegeBanner.getAttribute("src") || "assets/college-banner.svg"];
   }
+  preloadBannerImages(bannerImages);
   startBannerSlider();
 }
 
@@ -503,6 +520,32 @@ async function saveSettings() {
   await saveRemoteSettings(settings);
 }
 
+async function hasDuplicatePhone(phone) {
+  const normalized = normalizePhone(phone);
+  if (!normalized) return false;
+
+  const localDuplicate = getLocalRegistrations().some((row) => normalizePhone(row.phone) === normalized);
+  if (localDuplicate) return true;
+
+  if (!supabaseClient) return false;
+
+  const { data, error } = await supabaseClient
+    .from("registrations")
+    .select("id, phone")
+    .eq("phone", phone)
+    .limit(1);
+
+  if (!error && data && data.length > 0) return true;
+
+  const { data: allRows, error: allError } = await supabaseClient
+    .from("registrations")
+    .select("id, phone")
+    .limit(300);
+
+  if (allError) return false;
+  return (allRows || []).some((row) => normalizePhone(row.phone) === normalized);
+}
+
 async function submitRegistration(payload) {
   if (!supabaseClient) {
     saveLocalRegistration(payload);
@@ -512,6 +555,10 @@ async function submitRegistration(payload) {
 
   const { error } = await supabaseClient.from("registrations").insert(payload);
   if (error) {
+    if (String(error.message || "").toLowerCase().includes("duplicate") || String(error.message || "").toLowerCase().includes("unique")) {
+      setFormStatus("এই ফোন নাম্বার দিয়ে আগেই registration করা হয়েছে।", "error");
+      return false;
+    }
     saveLocalRegistration(payload);
     const hint = error.message ? ` (${error.message})` : "";
     if (String(error.message || "").includes("LockManager") || String(error.message || "").includes("timed out")) {
@@ -799,11 +846,17 @@ if (joinForm) joinForm.addEventListener("submit", async (event) => {
 
   const payload = {
     name: String(formData.get("name") || "").trim(),
-    phone: String(formData.get("phone") || "").trim(),
+    phone: normalizePhone(String(formData.get("phone") || "").trim()),
     group_name: String(formData.get("group") || "").trim(),
     profession: String(formData.get("profession") || "").trim(),
     comment: String(formData.get("comment") || "").trim(),
   };
+
+  const duplicate = await hasDuplicatePhone(payload.phone);
+  if (duplicate) {
+    setFormStatus("এই ফোন নাম্বার দিয়ে আগেই registration করা হয়েছে।", "error");
+    return;
+  }
 
   setFormStatus("Saving registration...", "normal");
   if (submitBtn) {
