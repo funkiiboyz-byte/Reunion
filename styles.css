@@ -224,14 +224,14 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.6rem;
-  padding: 0.4rem 0.3rem;
+  gap: 0.45rem;
+  padding: 0.35rem 0.25rem;
   border-bottom: 1px dashed rgba(155, 184, 236, 0.18);
 }
 
 .banner-upload-preview {
-  width: 64px;
-  height: 44px;
+  width: 52px;
+  height: 34px;
   border-radius: 0.55rem;
   overflow: hidden;
   border: 1px solid rgba(155, 184, 236, 0.25);
@@ -247,10 +247,14 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
 .banner-upload-info {
   font-size: 0.8rem;
   color: #dce7ff;
-  max-width: 72%;
+  max-width: 56%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.banner-upload-row .btn-danger {
+  padding: 0.28rem 0.55rem;
+  font-size: 0.74rem;
 }
 
 .admin-row.removing { opacity: 0.55; }

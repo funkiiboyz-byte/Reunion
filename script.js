@@ -233,7 +233,7 @@ function renderBannerUploadsList() {
     .map((row, index) => {
       const id = String(row.id || "");
       const shortLabel = row.source === "local" ? `Local upload #${index + 1}` : `DB image #${id}`;
-      return `<div class="banner-upload-row"><div class="banner-upload-preview"><img src="${escapeHtml(row.image_data)}" alt="${escapeHtml(shortLabel)}" loading="lazy" decoding="async" /></div><span class="banner-upload-info">${escapeHtml(shortLabel)}</span><button class="btn btn-danger btn-sm" data-remove-banner-id="${escapeHtml(id)}" type="button">Remove</button></div>`;
+      return `<div class="banner-upload-row"><div class="banner-upload-preview"><img src="${escapeHtml(row.image_data)}" alt="${escapeHtml(shortLabel)}" loading="lazy" decoding="async" /></div><span class="banner-upload-info">${escapeHtml(shortLabel)}</span><button class="btn btn-danger btn-sm" data-remove-banner-id="${escapeHtml(id)}" type="button">Delete</button></div>`;
     })
     .join("");
 }
@@ -292,7 +292,7 @@ async function removeUploadedBannerImageById(id, buttonEl) {
     setSyncStatus("Supabase unavailable: remove failed", "error");
     if (buttonEl) {
       buttonEl.disabled = false;
-      buttonEl.textContent = "Remove";
+      buttonEl.textContent = "Delete";
     }
     return;
   }
@@ -303,7 +303,7 @@ async function removeUploadedBannerImageById(id, buttonEl) {
     setSyncStatus(`Banner remove failed (${error.message || "unknown error"})`, "error");
     if (buttonEl) {
       buttonEl.disabled = false;
-      buttonEl.textContent = "Remove";
+      buttonEl.textContent = "Delete";
     }
     return;
   }
@@ -709,7 +709,7 @@ function renderAdminRegistrations(rows) {
       const name = escapeHtml(row.name || "Unknown");
       const groupLabel = escapeHtml(formatGroupLabel(row.group_name));
       const comment = row.comment ? `<small>💬 ${escapeHtml(row.comment)}</small>` : "";
-      return `<div class="admin-row"><div class="admin-row-info"><div>${name}</div><small>${groupLabel}</small>${comment}</div><button class="btn btn-danger btn-sm" data-remove-id="${id}" type="button">Remove</button></div>`;
+      return `<div class="admin-row"><div class="admin-row-info"><div>${name}</div><small>${groupLabel}</small>${comment}</div><button class="btn btn-danger btn-sm" data-remove-id="${id}" type="button">Delete</button></div>`;
     })
     .join("");
 }
@@ -740,7 +740,7 @@ async function removeRegistrationById(id, rowEl, buttonEl) {
     if (rowEl) rowEl.classList.remove("removing");
     if (buttonEl) {
       buttonEl.disabled = false;
-      buttonEl.textContent = "Remove";
+      buttonEl.textContent = "Delete";
     }
     return;
   }
@@ -766,7 +766,7 @@ async function removeRegistrationById(id, rowEl, buttonEl) {
       if (rowEl) rowEl.classList.remove("removing");
       if (buttonEl) {
         buttonEl.disabled = false;
-        buttonEl.textContent = "Remove";
+        buttonEl.textContent = "Delete";
       }
       return;
     }
