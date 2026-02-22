@@ -81,3 +81,8 @@ Registration form-এ optional `comment` field যোগ করা হয়েছ�
 alter table public.registrations add column if not exists comment text;
 ```
 `supabase_setup.sql` re-run করলেই safely apply হবে (existing records unchanged থাকবে)।
+
+
+## Banner slider images from Admin Panel
+Admin panel-এ `Banner Images (one URL per line)` field এ multiple image URL বসালে banner auto-slide করবে (line break বা comma-separated দুইভাবেই paste করা যাবে)।
+পুরানো single `Banner Image URL` field fallback হিসেবে থাকবে (blank list হলে সেটাই ব্যবহার হবে)।

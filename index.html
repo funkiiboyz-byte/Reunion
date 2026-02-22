@@ -28,7 +28,9 @@
 
     <main>
       <section class="banner container" id="about">
-        <img id="collegeBanner" src="assets/college-banner.svg" alt="Amla Govt College Kushtia banner" />
+        <div class="banner-slider" id="bannerSlider">
+          <img id="collegeBanner" src="assets/college-banner.svg" alt="Amla Govt College Kushtia banner" />
+        </div>
       </section>
 
 <section class="registrants-marquee container" id="registrantsMarquee" aria-label="Registered members ticker">
@@ -109,6 +111,9 @@
 
       <label for="bannerControl">Banner Image URL</label>
       <input id="bannerControl" type="url" placeholder="https://... অথবা /assets/..." />
+
+      <label for="bannerImagesControl">Banner Images (one URL per line)</label>
+      <textarea id="bannerImagesControl" rows="4" placeholder="https://image1.jpg&#10;https://image2.jpg&#10;/assets/college-banner.svg"></textarea>
 
       <label for="highlightsTitleControl">Highlights Section Title</label>
       <input id="highlightsTitleControl" type="text" placeholder="Event Highlights" />

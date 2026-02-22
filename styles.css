@@ -51,12 +51,21 @@ body {
 .btn-sm { padding: 0.35rem 0.75rem; border-radius: 0.6rem; font-size: 0.82rem; }
 
 .banner { margin-top: 0.5rem; }
-.banner img {
+.banner-slider {
+  position: relative;
   width: 100%;
   height: clamp(180px, 28vw, 320px);
-  object-fit: cover;
   border-radius: 1rem;
   border: 1px solid rgba(155, 184, 236, 0.22);
+  overflow: hidden;
+}
+
+.banner-slider img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.45s ease;
 }
 
 .hero { padding: 2.2rem 0; }
@@ -119,7 +128,7 @@ h2 { font-size: clamp(1.3rem, 3.1vw, 2rem); margin: 0 0 1rem; }
 .join-card { padding: 1.4rem; }
 .join-card p { color: var(--muted); }
 .join-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; margin-top: 0.8rem; }
-.join-form input, .join-form select, .admin-panel input {
+.join-form input, .join-form select, .admin-panel input, .admin-panel textarea {
   background: rgba(8, 16, 34, 0.85);
   border: 1px solid rgba(159, 178, 219, 0.3);
   color: var(--text);

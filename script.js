@@ -23,6 +23,7 @@ const heroTitle = document.getElementById("heroTitle");
 const heroDescription = document.getElementById("heroDescription");
 const registerCta = document.getElementById("registerCta");
 const collegeBanner = document.getElementById("collegeBanner");
+const bannerSlider = document.getElementById("bannerSlider");
 const statsSection = document.getElementById("statsSection");
 const highlightsSection = document.getElementById("highlights");
 const joinSection = document.getElementById("join");
@@ -32,6 +33,7 @@ const titleControl = document.getElementById("titleControl");
 const descControl = document.getElementById("descControl");
 const ctaControl = document.getElementById("ctaControl");
 const bannerControl = document.getElementById("bannerControl");
+const bannerImagesControl = document.getElementById("bannerImagesControl");
 const highlightsTitleControl = document.getElementById("highlightsTitleControl");
 const toggleStats = document.getElementById("toggleStats");
 const toggleHighlights = document.getElementById("toggleHighlights");
@@ -46,6 +48,9 @@ const SUPABASE_URL = "https://urlfmhgurdrernlpuyjj.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVybGZtaGd1cmRyZXJubHB1eWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2ODY4ODgsImV4cCI6MjA4NzI2Mjg4OH0.GZrIbCe207CZ3A7pCmcm5MyhcGqxix-g7S-dsndhhM8";
 
 let supabaseClient = null;
+let bannerImages = [];
+let bannerSlideIndex = 0;
+let bannerSlideTimer = null;
 
 function setVisible(el, show) {
   el.style.display = show ? "" : "none";
@@ -78,6 +83,56 @@ function clearInitialJoinHash() {
     history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
     window.scrollTo({ top: 0, behavior: "auto" });
   }
+}
+
+
+function normalizeBannerImagesFromText(text) {
+  const lines = String(text || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  return lines.flatMap((line) =>
+    line
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean),
+  );
+}
+
+function startBannerSlider() {
+  if (!collegeBanner) return;
+  if (bannerSlideTimer) clearInterval(bannerSlideTimer);
+
+  if (!bannerImages || bannerImages.length === 0) {
+    bannerImages = [collegeBanner.getAttribute("src") || "assets/college-banner.svg"];
+  }
+
+  bannerSlideIndex = 0;
+  collegeBanner.src = bannerImages[0];
+
+  if (bannerImages.length <= 1) return;
+
+  bannerSlideTimer = setInterval(() => {
+    bannerSlideIndex = (bannerSlideIndex + 1) % bannerImages.length;
+    collegeBanner.style.opacity = "0.35";
+    setTimeout(() => {
+      collegeBanner.src = bannerImages[bannerSlideIndex];
+      collegeBanner.style.opacity = "1";
+    }, 180);
+  }, 3200);
+}
+
+function updateBannerImagesFromSettings(settings) {
+  const parsed = normalizeBannerImagesFromText(settings.bannerImagesText || "");
+  if (parsed.length > 0) {
+    bannerImages = parsed;
+  } else if (settings.bannerSrc) {
+    bannerImages = [settings.bannerSrc];
+  } else {
+    bannerImages = [collegeBanner.getAttribute("src") || "assets/college-banner.svg"];
+  }
+  startBannerSlider();
 }
 
 function getLocalRegistrations() {
@@ -163,6 +218,7 @@ function collectSettingsFromControls() {
     heroDescription: descControl.value.trim() || heroDescription.textContent,
     ctaText: ctaControl.value.trim() || registerCta.textContent,
     bannerSrc: bannerControl.value.trim() || collegeBanner.getAttribute("src"),
+    bannerImagesText: bannerImagesControl.value.trim(),
     highlightsTitle: highlightsTitleControl.value.trim() || highlightsTitle.textContent,
     showStats: toggleStats.checked,
     showHighlights: toggleHighlights.checked,
@@ -175,6 +231,7 @@ function applySettings(settings) {
   if (settings.heroDescription) heroDescription.textContent = settings.heroDescription;
   if (settings.ctaText) registerCta.textContent = settings.ctaText;
   if (settings.bannerSrc) collegeBanner.src = settings.bannerSrc;
+  updateBannerImagesFromSettings(settings);
   if (settings.highlightsTitle) highlightsTitle.textContent = settings.highlightsTitle;
 
   setVisible(statsSection, settings.showStats !== false);
@@ -187,6 +244,7 @@ function hydrateControls(settings = {}) {
   descControl.value = settings.heroDescription || heroDescription.textContent;
   ctaControl.value = settings.ctaText || registerCta.textContent;
   bannerControl.value = settings.bannerSrc || collegeBanner.getAttribute("src") || "";
+  bannerImagesControl.value = settings.bannerImagesText || bannerImages.join("\n");
   highlightsTitleControl.value = settings.highlightsTitle || highlightsTitle.textContent;
   toggleStats.checked = settings.showStats !== false;
   toggleHighlights.checked = settings.showHighlights !== false;
@@ -625,6 +683,19 @@ if (adminRegistrationsList) adminRegistrationsList.addEventListener("click", asy
 });
 if (registerCta) registerCta.addEventListener("click", scrollToJoinSection);
 if (topRegisterBtn) topRegisterBtn.addEventListener("click", scrollToJoinSection);
+
+if (document) {
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (bannerSlideTimer) {
+        clearInterval(bannerSlideTimer);
+        bannerSlideTimer = null;
+      }
+      return;
+    }
+    startBannerSlider();
+  });
+}
 
 clearInitialJoinHash();
 initSupabase();
