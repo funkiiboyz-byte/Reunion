@@ -86,4 +86,5 @@ alter table public.registrations add column if not exists comment text;
 ## Banner slider images from Admin Panel
 Admin panel-এ `Banner Images (one URL per line)` field এ multiple image URL বসালে banner auto-slide করবে (line break বা comma-separated দুইভাবেই paste করা যাবে)।
 পুরানো single `Banner Image URL` field fallback হিসেবে থাকবে (blank list হলে সেটাই ব্যবহার হবে)।
-- PC থেকে সরাসরি image upload করতে চাইলে `Upload Banner Images (from your PC)` field থেকে multiple image select করো; system auto-convert করে slider list-এ add করবে।
+- PC থেকে সরাসরি image upload করতে চাইলে `Upload Banner Images (from your PC)` field থেকে multiple image select করো; image গুলো `banner_images` table-এ save হবে এবং slider-এ auto-load হবে।
+- এটা কাজ করানোর জন্য latest `supabase_setup.sql` অবশ্যই re-run করো (নতুন `banner_images` table + policy add হয়েছে)।

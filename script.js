@@ -44,6 +44,7 @@ const saveAdmin = document.getElementById("saveAdmin");
 const SETTINGS_KEY = "agc-reunion-admin-settings";
 const SESSION_KEY = "agc-reunion-admin-session";
 const LOCAL_REG_KEY = "agc-reunion-local-registrations";
+const LOCAL_BANNER_UPLOAD_KEY = "agc-reunion-local-banner-uploads";
 
 const SUPABASE_URL = "https://urlfmhgurdrernlpuyjj.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVybGZtaGd1cmRyZXJubHB1eWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2ODY4ODgsImV4cCI6MjA4NzI2Mjg4OH0.GZrIbCe207CZ3A7pCmcm5MyhcGqxix-g7S-dsndhhM8";
@@ -52,6 +53,7 @@ let supabaseClient = null;
 let bannerImages = [];
 let bannerSlideIndex = 0;
 let bannerSlideTimer = null;
+let uploadedBannerImages = [];
 
 function setVisible(el, show) {
   el.style.display = show ? "" : "none";
@@ -126,8 +128,10 @@ function startBannerSlider() {
 
 function updateBannerImagesFromSettings(settings) {
   const parsed = normalizeBannerImagesFromText(settings.bannerImagesText || "");
-  if (parsed.length > 0) {
-    bannerImages = parsed;
+  const merged = [...parsed, ...uploadedBannerImages].filter(Boolean);
+
+  if (merged.length > 0) {
+    bannerImages = Array.from(new Set(merged));
   } else if (settings.bannerSrc) {
     bannerImages = [settings.bannerSrc];
   } else {
@@ -157,25 +161,63 @@ async function handleBannerFileUploads(fileList) {
 
   try {
     const dataUrls = await Promise.all(selected.map((file) => readFileAsDataUrl(file)));
-    const current = normalizeBannerImagesFromText(bannerImagesControl.value);
-    const merged = [...current, ...dataUrls];
-    bannerImagesControl.value = merged.join("\n");
+
+    if (supabaseClient) {
+      const rows = dataUrls.map((imageData) => ({ image_data: imageData }));
+      const { error } = await supabaseClient.from("banner_images").insert(rows);
+      if (error) {
+        throw new Error(error.message || "Supabase banner upload failed");
+      }
+      await loadUploadedBannerImages();
+    } else {
+      const local = getLocalBannerUploads();
+      const mergedLocal = Array.from(new Set([...local, ...dataUrls]));
+      setLocalBannerUploads(mergedLocal);
+      uploadedBannerImages = mergedLocal;
+      setSyncStatus("Uploaded locally (Supabase unavailable)", "error");
+    }
 
     const settings = collectSettingsFromControls();
     applySettings(settings);
     setLocalSettings(settings);
     if (supabaseClient) {
       await saveRemoteSettings(settings);
-    } else {
-      setSyncStatus("Uploaded locally (Supabase unavailable)", "error");
     }
 
-    setSyncStatus(`Added ${dataUrls.length} image(s) to banner slider`, "success");
+    setSyncStatus(`Added ${dataUrls.length} image(s) to banner database`, "success");
   } catch (error) {
     setSyncStatus(`Image upload failed (${error.message || "unknown error"})`, "error");
   } finally {
     if (bannerUploadControl) bannerUploadControl.value = "";
   }
+}
+
+function getLocalBannerUploads() {
+  return JSON.parse(localStorage.getItem(LOCAL_BANNER_UPLOAD_KEY) || "[]");
+}
+
+function setLocalBannerUploads(rows) {
+  localStorage.setItem(LOCAL_BANNER_UPLOAD_KEY, JSON.stringify(rows));
+}
+
+async function loadUploadedBannerImages() {
+  if (!supabaseClient) {
+    uploadedBannerImages = getLocalBannerUploads();
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("banner_images")
+    .select("image_data")
+    .order("created_at", { ascending: true })
+    .limit(30);
+
+  if (error) {
+    uploadedBannerImages = getLocalBannerUploads();
+    return;
+  }
+
+  uploadedBannerImages = (data || []).map((row) => String(row.image_data || "").trim()).filter(Boolean);
 }
 
 function getLocalRegistrations() {
@@ -353,11 +395,13 @@ async function saveRemoteSettings(settings) {
 
 async function loadSettings() {
   const localSettings = getLocalSettings();
+  await loadUploadedBannerImages();
   applySettings(localSettings);
   hydrateControls(localSettings);
 
   const remoteSettings = await loadRemoteSettings();
   if (remoteSettings) {
+    await loadUploadedBannerImages();
     applySettings(remoteSettings);
     hydrateControls(remoteSettings);
     setLocalSettings(remoteSettings);

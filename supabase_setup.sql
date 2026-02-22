@@ -46,6 +46,15 @@ create index if not exists idx_registrations_created_at on public.registrations 
 -- Safe schema upgrade: add optional comment field without touching old data
 alter table public.registrations add column if not exists comment text;
 
+-- 2.1) Banner images table (stores uploaded slider images)
+create table if not exists public.banner_images (
+  id bigint generated always as identity primary key,
+  image_data text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_banner_images_created_at on public.banner_images (created_at asc);
+
 -- 3) Approved admin emails
 create table if not exists public.admin_approved_emails (
   id uuid primary key default gen_random_uuid(),
@@ -62,6 +71,7 @@ on public.admin_approved_emails (lower(email));
 -- 4) RLS enable
 alter table public.site_settings enable row level security;
 alter table public.registrations enable row level security;
+alter table public.banner_images enable row level security;
 alter table public.admin_approved_emails enable row level security;
 
 -- 5) Reset old policies (idempotent)
@@ -82,6 +92,13 @@ BEGIN
   END IF;
   IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='registrations' AND policyname='registrations_delete_admin_only') THEN
     DROP POLICY registrations_delete_admin_only ON public.registrations;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='banner_images' AND policyname='banner_images_select_all') THEN
+    DROP POLICY banner_images_select_all ON public.banner_images;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='banner_images' AND policyname='banner_images_insert_all') THEN
+    DROP POLICY banner_images_insert_all ON public.banner_images;
   END IF;
 
   IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='admin_approved_emails' AND policyname='admin_approved_emails_self_select') THEN
@@ -120,6 +137,18 @@ using (true);
 
 create policy registrations_insert_all
 on public.registrations
+for insert
+to anon, authenticated
+with check (true);
+
+create policy banner_images_select_all
+on public.banner_images
+for select
+to anon, authenticated
+using (true);
+
+create policy banner_images_insert_all
+on public.banner_images
 for insert
 to anon, authenticated
 with check (true);
