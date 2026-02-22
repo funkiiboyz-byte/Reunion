@@ -43,6 +43,9 @@ create table if not exists public.registrations (
 
 create index if not exists idx_registrations_created_at on public.registrations (created_at desc);
 
+-- Safe schema upgrade: add optional comment field without touching old data
+alter table public.registrations add column if not exists comment text;
+
 -- 3) Approved admin emails
 create table if not exists public.admin_approved_emails (
   id uuid primary key default gen_random_uuid(),

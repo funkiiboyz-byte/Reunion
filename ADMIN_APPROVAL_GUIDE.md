@@ -73,3 +73,11 @@ Latest update-এ Supabase client auth persistence memory mode এ নেওয়�
 ## Remove না হলে (important)
 `Remove` button reliable করার জন্য এখন `delete_registration_admin(reg_id)` RPC ব্যবহার করা হয়। তাই updated `supabase_setup.sql` অবশ্যই re-run করো।
 এই RPC শুধুমাত্র approved active authenticated admin email হলে delete করবে।
+
+
+## মন্তব্য (Comment) field update
+Registration form-এ optional `comment` field যোগ করা হয়েছে। পুরনো data delete হবে না—শুধু নতুন column add হয়:
+```sql
+alter table public.registrations add column if not exists comment text;
+```
+`supabase_setup.sql` re-run করলেই safely apply হবে (existing records unchanged থাকবে)।

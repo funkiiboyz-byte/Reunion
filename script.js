@@ -302,10 +302,10 @@ async function submitRegistration(payload) {
 }
 
 function toCsv(rows) {
-  const headers = ["ID", "Name", "Phone", "Group", "Profession", "Created At"];
+  const headers = ["ID", "Name", "Phone", "Group", "Profession", "Comment", "Created At"];
   const lines = [headers.join(",")];
   rows.forEach((row) => {
-    const cols = [row.id, row.name, row.phone, row.group_name, row.profession, row.created_at].map(
+    const cols = [row.id, row.name, row.phone, row.group_name, row.profession, row.comment, row.created_at].map(
       (v) => `"${String(v ?? "").replaceAll('"', '""')}"`,
     );
     lines.push(cols.join(","));
@@ -419,7 +419,7 @@ async function fetchAllRegistrations() {
 
   const { data, error } = await supabaseClient
     .from("registrations")
-    .select("id, name, group_name, created_at")
+    .select("id, name, group_name, comment, created_at")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -443,7 +443,8 @@ function renderAdminRegistrations(rows) {
       const id = String(row.id);
       const name = escapeHtml(row.name || "Unknown");
       const groupLabel = escapeHtml(formatGroupLabel(row.group_name));
-      return `<div class="admin-row"><div class="admin-row-info"><div>${name}</div><small>${groupLabel}</small></div><button class="btn btn-danger btn-sm" data-remove-id="${id}" type="button">Remove</button></div>`;
+      const comment = row.comment ? `<small>💬 ${escapeHtml(row.comment)}</small>` : "";
+      return `<div class="admin-row"><div class="admin-row-info"><div>${name}</div><small>${groupLabel}</small>${comment}</div><button class="btn btn-danger btn-sm" data-remove-id="${id}" type="button">Remove</button></div>`;
     })
     .join("");
 }
@@ -575,6 +576,7 @@ if (joinForm) joinForm.addEventListener("submit", async (event) => {
     phone: String(formData.get("phone") || "").trim(),
     group_name: String(formData.get("group") || "").trim(),
     profession: String(formData.get("profession") || "").trim(),
+    comment: String(formData.get("comment") || "").trim(),
   };
 
   setFormStatus("Saving registration...", "normal");
