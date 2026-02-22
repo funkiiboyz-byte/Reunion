@@ -47,8 +47,6 @@
         <p class="eyebrow">Amla Govt College Kushtia</p>
         <h1 id="heroTitle">HSC 2020 Batch <span>Reunion 2026</span></h1>
         <p class="hero-text" id="heroDescription">স্মৃতির ক্যাম্পাসে আবার একসাথে — আমাদের সবার প্রিয় HSC 2020 ব্যাচের জন্য একটি এলিগ্যান্ট, প্রাণবন্ত এবং প্রফেশনাল রিইউনিয়ন আয়োজন।</p>
-        <p class="event-meta">📅 12 Feb 2026 • 🕙 10:00 AM • 📍 Amla Govt College Campus, Kushtia</p>
-        <div class="countdown" id="countdownTimer" aria-label="Reunion countdown">Loading countdown...</div>
         <div class="hero-actions">
           <button class="btn btn-primary" type="button" id="registerCta">Register Now</button>
           <a class="btn btn-ghost" href="#highlights">Explore Event</a>
@@ -79,96 +77,21 @@
           <h2>Be Part of the Reunion</h2>
           <p>এখনই রেজিস্ট্রেশন করে তোমার আসন নিশ্চিত করো। Let’s relive our best college memories — together.</p>
           <form class="join-form" id="joinForm" action="#" method="post">
-            <input type="text" name="name" placeholder="Full Name" required />
-            <input type="text" name="batchYear" placeholder="Batch / Passing Year (e.g. 2020)" required />
+            <input type="text" name="name" placeholder="তোমার নাম" required />
+            <input type="tel" name="phone" placeholder="মোবাইল নাম্বার" required />
             <select name="group" required>
-              <option value="" selected disabled>Department</option>
+              <option value="" selected disabled>Group নির্বাচন করো</option>
               <option value="science">Science</option>
               <option value="humanities">Humanities</option>
               <option value="business">Business Studies</option>
             </select>
-            <input type="tel" name="phone" placeholder="Phone Number" required />
-            <input type="email" name="email" placeholder="Email Address" required />
-            <select name="payment" required>
-              <option value="" selected disabled>Payment Method</option>
-              <option value="bKash">bKash</option>
-              <option value="Nagad">Nagad</option>
-              <option value="Bank">Bank Transfer</option>
-            </select>
             <input type="text" name="profession" placeholder="Current Profession" required />
-            <input type="text" name="location" placeholder="Current Location" />
             <input type="text" name="comment" placeholder="মন্তব্য (ঐচ্ছিক)" />
-            <button type="submit" class="btn btn-primary">Register Now</button>
+            <button type="submit" class="btn btn-primary">Confirm Seat</button>
           </form>
           <p class="form-status" id="formStatus"></p>
         </div>
       </section>
-
-      <section class="alumni-directory container" id="directory">
-        <h2>Alumni Directory (Batch-wise)</h2>
-        <div class="directory-filters">
-          <input id="directorySearch" type="text" placeholder="Search by name" />
-          <input id="directoryBatchFilter" type="text" placeholder="Filter by batch (e.g. 2020)" />
-        </div>
-        <div id="directoryList" class="directory-list">
-          <p class="admin-empty">Loading alumni directory...</p>
-        </div>
-      </section>
-
-      <section class="event-details container" id="eventDetails">
-        <h2>Event Details</h2>
-        <div class="highlight-grid">
-          <article class="highlight-card"><h3>Program Schedule</h3><p>10:00 AM Check-in, 12:00 PM Cultural Session, 3:00 PM Memory Talk, 6:00 PM Gala Dinner.</p></article>
-          <article class="highlight-card"><h3>Venue Map</h3><p>Main stage: College field. Registration desk: Academic Building ground floor.</p></article>
-          <article class="highlight-card"><h3>Dress Code</h3><p>College theme color (Blue/White) with batch badge encouraged.</p></article>
-        </div>
-      </section>
-
-      <section class="gallery container" id="gallery">
-        <h2>Photo & Memory Gallery</h2>
-        <input id="memoryUpload" type="file" accept="image/*,video/*" multiple />
-        <p class="admin-mini">Upload stays in your browser for preview (local demo).</p>
-        <div id="memoryPreview" class="directory-list"><p class="admin-empty">No media uploaded yet.</p></div>
-      </section>
-
-      <section class="news container" id="newsUpdates">
-        <h2>News & Updates</h2>
-        <div class="highlight-grid">
-          <article class="highlight-card"><h3>Announcement</h3><p>Early-bird registration চলছে 31 Dec পর্যন্ত।</p></article>
-          <article class="highlight-card"><h3>Guest Update</h3><p>Former অধ্যাপকগণকে আনুষ্ঠানিকভাবে আমন্ত্রণ পাঠানো হয়েছে।</p></article>
-          <article class="highlight-card"><h3>Reminder</h3><p>Payment reference screenshot admin panel এ verify করা হবে।</p></article>
-        </div>
-      </section>
-
-      <section class="guest-book container" id="guestBook">
-        <h2>Guest Book / Messages</h2>
-        <form id="guestBookForm" class="join-form" action="#" method="post">
-          <input type="text" name="author" placeholder="Your Name" required />
-          <input type="text" name="batch" placeholder="Your Batch" required />
-          <input type="text" name="message" placeholder="Share your memory or greetings" required />
-          <button type="submit" class="btn btn-primary">Post Message</button>
-        </form>
-        <div id="guestBookList" class="directory-list"><p class="admin-empty">No messages yet.</p></div>
-      </section>
-
-      <section class="committee container" id="committee">
-        <h2>Organizing Committee</h2>
-        <div class="highlight-grid">
-          <article class="highlight-card"><h3>Convener</h3><p>Mahfuz Rahman (Science '20) • 017XXXXXXXX</p></article>
-          <article class="highlight-card"><h3>Member Secretary</h3><p>Naznin Sultana (Humanities '20) • 018XXXXXXXX</p></article>
-          <article class="highlight-card"><h3>Finance Lead</h3><p>Rakib Hasan (Business '20) • 019XXXXXXXX</p></article>
-        </div>
-      </section>
-
-      <section class="contact container" id="contact">
-        <h2>Contact & FAQ</h2>
-        <div class="highlight-grid">
-          <article class="highlight-card"><h3>Contact</h3><p>Phone: 01XXXXXXXXX<br>Email: reunion@agc.com</p></article>
-          <article class="highlight-card"><h3>Social</h3><p>Facebook: AGC HSC'20 Reunion<br>WhatsApp Group Link available after registration</p></article>
-          <article class="highlight-card"><h3>FAQ</h3><p>Q: Family নিয়ে আসা যাবে?<br>A: Yes, pre-confirm in registration comment.</p></article>
-        </div>
-      </section>
-
     </main>
 
     <aside class="admin-panel" id="adminPanel" aria-hidden="true">

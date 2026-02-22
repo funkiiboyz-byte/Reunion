@@ -46,11 +46,6 @@ create index if not exists idx_registrations_created_at on public.registrations 
 -- Safe schema upgrade: add optional comment field without touching old data
 alter table public.registrations add column if not exists comment text;
 
-alter table public.registrations add column if not exists batch_year text;
-alter table public.registrations add column if not exists email text;
-alter table public.registrations add column if not exists payment_method text;
-alter table public.registrations add column if not exists location text;
-
 -- 2.1) Banner images table (stores uploaded slider images)
 create table if not exists public.banner_images (
   id bigint generated always as identity primary key,
