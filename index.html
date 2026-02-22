@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Amla Govt College Kushtia | HSC 2020 Batch Reunion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-glow bg-glow-1" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow-2" aria-hidden="true"></div>
+
+    <header class="site-header container">
+      <div class="logo">AGC <span>HSC'20</span></div>
+      <nav class="nav-links">
+        <a href="#about">About</a>
+        <a href="#highlights">Highlights</a>
+        <a href="#join">Join</a>
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-outline" id="topRegisterBtn" type="button">Register</button>
+        <button class="btn btn-admin" id="adminButton" type="button">Admin</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="banner container" id="about">
+        <div class="banner-slider" id="bannerSlider">
+          <img id="collegeBanner" class="banner-layer is-active" src="assets/college-banner.svg" alt="Amla Govt College Kushtia banner" loading="eager" fetchpriority="high" decoding="async" />
+          <img id="collegeBannerSecondary" class="banner-layer" src="assets/college-banner.svg" alt="Amla Govt College Kushtia banner" aria-hidden="true" loading="eager" decoding="async" />
+        </div>
+      </section>
+
+<section class="registrants-marquee container" id="registrantsMarquee" aria-label="Registered members ticker">
+        <p class="marquee-title">Recent Registrations</p>
+        <div class="marquee-shell">
+          <div class="marquee-track" id="registrantsTickerTrack">
+            <span class="marquee-item">Loading...</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero container" id="heroSection">
+        <p class="eyebrow">Amla Govt College Kushtia</p>
+        <h1 id="heroTitle">HSC 2020 Batch <span>Reunion 2026</span></h1>
+        <p class="hero-text" id="heroDescription">স্মৃতির ক্যাম্পাসে আবার একসাথে — আমাদের সবার প্রিয় HSC 2020 ব্যাচের জন্য একটি এলিগ্যান্ট, প্রাণবন্ত এবং প্রফেশনাল রিইউনিয়ন আয়োজন।</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" type="button" id="registerCta">Register Now</button>
+          <a class="btn btn-ghost" href="#highlights">Explore Event</a>
+        </div>
+
+        <div class="stats-grid" id="statsSection">
+          <article class="stat-card"><p class="stat-number" id="registrationLiveCount">0</p><p class="stat-label">Live Registrations</p></article>
+          <article class="stat-card"><p class="stat-number">1 Day</p><p class="stat-label">Mega Event</p></article>
+          <article class="stat-card"><p class="stat-number">10+</p><p class="stat-label">Fun Segments</p></article>
+          <article class="stat-card"><p class="stat-number">2026</p><p class="stat-label">Reunion Year</p></article>
+        </div>
+      </section>
+
+
+      
+
+      <section class="highlights container" id="highlights">
+        <h2 id="highlightsTitle">Event Highlights</h2>
+        <div class="highlight-grid">
+          <article class="highlight-card"><h3>Campus Walkthrough</h3><p>পুরোনো ক্লাসরুম, করিডর আর স্মৃতিময় স্পটগুলো ঘুরে দেখা।</p></article>
+          <article class="highlight-card"><h3>Cultural Night</h3><p>গান, আড্ডা, পারফরম্যান্স আর ব্যাচমেটদের বিশেষ উপস্থাপনা।</p></article>
+          <article class="highlight-card"><h3>Awards & Memories</h3><p>বন্ধুত্ব, অর্জন এবং সেরা মুহূর্তগুলোকে সম্মাননা দেওয়া হবে।</p></article>
+        </div>
+      </section>
+
+      <section class="join container" id="join">
+        <div class="join-card">
+          <h2>Be Part of the Reunion</h2>
+          <p>এখনই রেজিস্ট্রেশন করে তোমার আসন নিশ্চিত করো। Let’s relive our best college memories — together.</p>
+          <form class="join-form" id="joinForm" action="#" method="post">
+            <input type="text" name="name" placeholder="তোমার নাম" required />
+            <input type="tel" name="phone" placeholder="মোবাইল নাম্বার" required />
+            <select name="group" required>
+              <option value="" selected disabled>Group নির্বাচন করো</option>
+              <option value="science">Science</option>
+              <option value="humanities">Humanities</option>
+              <option value="business">Business Studies</option>
+            </select>
+            <input type="text" name="profession" placeholder="Current Profession" required />
+            <input type="text" name="comment" placeholder="মন্তব্য (ঐচ্ছিক)" />
+            <button type="submit" class="btn btn-primary">Confirm Seat</button>
+          </form>
+          <p class="form-status" id="formStatus"></p>
+        </div>
+      </section>
+    </main>
+
+    <aside class="admin-panel" id="adminPanel" aria-hidden="true">
+      <div class="admin-panel-top">
+        <h3>Admin Control Panel</h3>
+        <button class="btn btn-ghost btn-sm" id="logoutAdmin" type="button">Logout</button>
+      </div>
+      <p>Login করার পর এখান থেকেই site control করতে পারবে।</p>
+
+      <label for="titleControl">Hero Title</label>
+      <input id="titleControl" type="text" placeholder="HSC 2020 Batch Reunion 2026" />
+
+      <label for="descControl">Hero Description</label>
+      <input id="descControl" type="text" placeholder="Hero description update" />
+
+      <label for="ctaControl">Register CTA Text</label>
+      <input id="ctaControl" type="text" placeholder="Register Now" />
+
+      <label for="bannerUploadControl">Upload Banner Images (from your PC)</label>
+      <input id="bannerUploadControl" type="file" accept="image/*" multiple />
+      <p class="admin-mini">Selected files will be converted and added to slider images automatically.</p>
+
+      <h4 class="admin-subtitle">Uploaded Banner Images</h4>
+      <div class="admin-banner-uploads" id="bannerUploadsList">
+        <p class="admin-empty">No uploaded images yet.</p>
+      </div>
+
+      <label for="highlightsTitleControl">Highlights Section Title</label>
+      <input id="highlightsTitleControl" type="text" placeholder="Event Highlights" />
+
+      <div class="toggle-row">
+        <label><input id="toggleStats" type="checkbox" checked /> Stats</label>
+        <label><input id="toggleHighlights" type="checkbox" checked /> Highlights</label>
+        <label><input id="toggleJoin" type="checkbox" checked /> Registration</label>
+      </div>
+
+      <button class="btn btn-primary" id="saveAdmin" type="button">Save Changes</button>
+      <button class="btn btn-ghost" id="downloadRegistrations" type="button">Download Registrations (Excel CSV)</button>
+      <p class="admin-mini" id="registrationsCount">Registrations: --</p>
+      <p class="sync-status" id="syncStatus">Sync: local mode</p>
+
+      <hr class="admin-divider" />
+      <h4 class="admin-subtitle">Manage Registrations</h4>
+      <div class="admin-registrations" id="adminRegistrationsList">
+        <p class="admin-empty">Loading registrations...</p>
+      </div>
+
+    </aside>
+
+    <dialog id="adminDialog" class="admin-dialog">
+      <form class="admin-login-form" id="adminLoginForm">
+        <h3>Admin Login</h3>
+        <p>শুধু approved admin email দিয়েই login করা যাবে।</p>
+        <input type="email" id="adminEmail" placeholder="Admin Email" required />
+        <input type="password" id="adminPass" placeholder="Password" required />
+        <p id="loginMsg" class="login-msg"></p>
+        <div class="login-actions">
+          <button type="button" class="btn btn-ghost" id="closeDialog">Cancel</button>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </div>
+      </form>
+    </dialog>
+
+
+    
+
+    <dialog id="successDialog" class="success-dialog">
+      <div class="success-dialog-card">
+        <p class="success-dialog-badge">🎊 Registration Confirmed</p>
+        <p class="success-dialog-title" id="successDialogTitle">অভিনন্দন!</p>
+        <p class="success-dialog-text" id="successDialogText">তোমার seat successfully confirmed হয়েছে। Reunion-এ স্বাগতম!</p>
+        <button type="button" class="btn btn-primary" id="successDialogClose">চমৎকার!</button>
+      </div>
+    </dialog>
+
+    <footer class="site-footer container"><p id="footerText">© 2026 Amla Govt College Kushtia — HSC 2020 Batch Reunion</p></footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
