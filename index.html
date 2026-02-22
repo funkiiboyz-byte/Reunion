@@ -29,7 +29,8 @@
     <main>
       <section class="banner container" id="about">
         <div class="banner-slider" id="bannerSlider">
-          <img id="collegeBanner" src="assets/college-banner.svg" alt="Amla Govt College Kushtia banner" />
+          <img id="collegeBanner" class="banner-layer is-active" src="assets/college-banner.svg" alt="Amla Govt College Kushtia banner" />
+          <img id="collegeBannerSecondary" class="banner-layer" src="assets/college-banner.svg" alt="Amla Govt College Kushtia banner" aria-hidden="true" />
         </div>
       </section>
 
@@ -118,6 +119,11 @@
       <label for="bannerUploadControl">Upload Banner Images (from your PC)</label>
       <input id="bannerUploadControl" type="file" accept="image/*" multiple />
       <p class="admin-mini">Selected files will be converted and added to slider images automatically.</p>
+
+      <h4 class="admin-subtitle">Uploaded Banner Images</h4>
+      <div class="admin-banner-uploads" id="bannerUploadsList">
+        <p class="admin-empty">No uploaded images yet.</p>
+      </div>
 
       <label for="highlightsTitleControl">Highlights Section Title</label>
       <input id="highlightsTitleControl" type="text" placeholder="Event Highlights" />

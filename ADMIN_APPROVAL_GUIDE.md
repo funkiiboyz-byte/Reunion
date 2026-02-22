@@ -88,3 +88,10 @@ Admin panel-এ `Banner Images (one URL per line)` field এ multiple image URL 
 পুরানো single `Banner Image URL` field fallback হিসেবে থাকবে (blank list হলে সেটাই ব্যবহার হবে)।
 - PC থেকে সরাসরি image upload করতে চাইলে `Upload Banner Images (from your PC)` field থেকে multiple image select করো; image গুলো `banner_images` table-এ save হবে এবং slider-এ auto-load হবে।
 - এটা কাজ করানোর জন্য latest `supabase_setup.sql` অবশ্যই re-run করো (নতুন `banner_images` table + policy add হয়েছে)।
+
+
+## Banner image remove (Admin)
+Admin panel-এ `Uploaded Banner Images` list-এ প্রতিটি image row-র পাশে `Remove` button আছে।
+- DB image হলে `banner_images` table থেকে delete হবে (approved active admin login দরকার)।
+- Supabase unavailable/local mode হলে local upload list থেকে remove হবে।
+

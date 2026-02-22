@@ -23,6 +23,7 @@ const heroTitle = document.getElementById("heroTitle");
 const heroDescription = document.getElementById("heroDescription");
 const registerCta = document.getElementById("registerCta");
 const collegeBanner = document.getElementById("collegeBanner");
+const collegeBannerSecondary = document.getElementById("collegeBannerSecondary");
 const bannerSlider = document.getElementById("bannerSlider");
 const statsSection = document.getElementById("statsSection");
 const highlightsSection = document.getElementById("highlights");
@@ -35,6 +36,7 @@ const ctaControl = document.getElementById("ctaControl");
 const bannerControl = document.getElementById("bannerControl");
 const bannerImagesControl = document.getElementById("bannerImagesControl");
 const bannerUploadControl = document.getElementById("bannerUploadControl");
+const bannerUploadsList = document.getElementById("bannerUploadsList");
 const highlightsTitleControl = document.getElementById("highlightsTitleControl");
 const toggleStats = document.getElementById("toggleStats");
 const toggleHighlights = document.getElementById("toggleHighlights");
@@ -104,7 +106,7 @@ function normalizeBannerImagesFromText(text) {
 }
 
 function startBannerSlider() {
-  if (!collegeBanner) return;
+  if (!collegeBanner || !collegeBannerSecondary) return;
   if (bannerSlideTimer) clearInterval(bannerSlideTimer);
 
   if (!bannerImages || bannerImages.length === 0) {
@@ -113,22 +115,26 @@ function startBannerSlider() {
 
   bannerSlideIndex = 0;
   collegeBanner.src = bannerImages[0];
+  collegeBanner.classList.add("is-active");
+  collegeBannerSecondary.classList.remove("is-active");
 
   if (bannerImages.length <= 1) return;
 
   bannerSlideTimer = setInterval(() => {
-    bannerSlideIndex = (bannerSlideIndex + 1) % bannerImages.length;
-    collegeBanner.style.opacity = "0.35";
-    setTimeout(() => {
-      collegeBanner.src = bannerImages[bannerSlideIndex];
-      collegeBanner.style.opacity = "1";
-    }, 180);
-  }, 3200);
+    const nextIndex = (bannerSlideIndex + 1) % bannerImages.length;
+    const active = collegeBanner.classList.contains("is-active") ? collegeBanner : collegeBannerSecondary;
+    const standby = active === collegeBanner ? collegeBannerSecondary : collegeBanner;
+
+    standby.src = bannerImages[nextIndex];
+    standby.classList.add("is-active");
+    active.classList.remove("is-active");
+    bannerSlideIndex = nextIndex;
+  }, 4600);
 }
 
 function updateBannerImagesFromSettings(settings) {
   const parsed = normalizeBannerImagesFromText(settings.bannerImagesText || "");
-  const merged = [...parsed, ...uploadedBannerImages].filter(Boolean);
+  const merged = [...parsed, ...uploadedBannerImages.map((row) => row.image_data)].filter(Boolean);
 
   if (merged.length > 0) {
     bannerImages = Array.from(new Set(merged));
@@ -173,7 +179,8 @@ async function handleBannerFileUploads(fileList) {
       const local = getLocalBannerUploads();
       const mergedLocal = Array.from(new Set([...local, ...dataUrls]));
       setLocalBannerUploads(mergedLocal);
-      uploadedBannerImages = mergedLocal;
+      uploadedBannerImages = mergedLocal.map((image_data, idx) => ({ id: `local-${idx}`, image_data, source: "local" }));
+      renderBannerUploadsList();
       setSyncStatus("Uploaded locally (Supabase unavailable)", "error");
     }
 
@@ -200,24 +207,98 @@ function setLocalBannerUploads(rows) {
   localStorage.setItem(LOCAL_BANNER_UPLOAD_KEY, JSON.stringify(rows));
 }
 
+function renderBannerUploadsList() {
+  if (!bannerUploadsList) return;
+
+  if (!uploadedBannerImages || uploadedBannerImages.length === 0) {
+    bannerUploadsList.innerHTML = '<p class="admin-empty">No uploaded images yet.</p>';
+    return;
+  }
+
+  bannerUploadsList.innerHTML = uploadedBannerImages
+    .map((row, index) => {
+      const id = String(row.id || "");
+      const shortLabel = row.source === "local" ? `Local upload #${index + 1}` : `DB image #${id}`;
+      return `<div class="banner-upload-row"><span class="banner-upload-info">${escapeHtml(shortLabel)}</span><button class="btn btn-danger btn-sm" data-remove-banner-id="${escapeHtml(id)}" type="button">Remove</button></div>`;
+    })
+    .join("");
+}
+
 async function loadUploadedBannerImages() {
   if (!supabaseClient) {
-    uploadedBannerImages = getLocalBannerUploads();
+    const localRows = getLocalBannerUploads();
+    uploadedBannerImages = localRows.map((image_data, idx) => ({ id: `local-${idx}`, image_data, source: "local" }));
+    renderBannerUploadsList();
     return;
   }
 
   const { data, error } = await supabaseClient
     .from("banner_images")
-    .select("image_data")
+    .select("id, image_data, created_at")
     .order("created_at", { ascending: true })
-    .limit(30);
+    .limit(40);
 
   if (error) {
-    uploadedBannerImages = getLocalBannerUploads();
+    const localRows = getLocalBannerUploads();
+    uploadedBannerImages = localRows.map((image_data, idx) => ({ id: `local-${idx}`, image_data, source: "local" }));
+    renderBannerUploadsList();
     return;
   }
 
-  uploadedBannerImages = (data || []).map((row) => String(row.image_data || "").trim()).filter(Boolean);
+  uploadedBannerImages = (data || [])
+    .map((row) => ({ id: row.id, image_data: String(row.image_data || "").trim(), source: "db" }))
+    .filter((row) => row.image_data);
+  renderBannerUploadsList();
+}
+
+async function removeUploadedBannerImageById(id, buttonEl) {
+  if (!id) return;
+
+  if (buttonEl) {
+    buttonEl.disabled = true;
+    buttonEl.textContent = "Removing...";
+  }
+
+  if (String(id).startsWith("local-")) {
+    const idx = Number(String(id).replace("local-", ""));
+    const localRows = getLocalBannerUploads();
+    if (!Number.isNaN(idx) && idx >= 0 && idx < localRows.length) {
+      localRows.splice(idx, 1);
+      setLocalBannerUploads(localRows);
+    }
+    await loadUploadedBannerImages();
+    const settings = collectSettingsFromControls();
+    applySettings(settings);
+    setLocalSettings(settings);
+    setSyncStatus("Local banner image removed", "success");
+    return;
+  }
+
+  if (!supabaseClient) {
+    setSyncStatus("Supabase unavailable: remove failed", "error");
+    if (buttonEl) {
+      buttonEl.disabled = false;
+      buttonEl.textContent = "Remove";
+    }
+    return;
+  }
+
+  const numericId = Number(id);
+  const { error } = await supabaseClient.from("banner_images").delete().eq("id", numericId);
+  if (error) {
+    setSyncStatus(`Banner remove failed (${error.message || "unknown error"})`, "error");
+    if (buttonEl) {
+      buttonEl.disabled = false;
+      buttonEl.textContent = "Remove";
+    }
+    return;
+  }
+
+  await loadUploadedBannerImages();
+  const settings = collectSettingsFromControls();
+  applySettings(settings);
+  setLocalSettings(settings);
+  setSyncStatus("Banner image removed", "success");
 }
 
 function getLocalRegistrations() {
@@ -768,6 +849,20 @@ if (adminRegistrationsList) adminRegistrationsList.addEventListener("click", asy
   const rowEl = target.closest(".admin-row");
   await removeRegistrationById(removeId, rowEl, target);
 });
+
+if (bannerUploadsList) bannerUploadsList.addEventListener("click", async (event) => {
+  const clicked = event.target;
+  if (!(clicked instanceof Element)) return;
+
+  const target = clicked.closest("[data-remove-banner-id]");
+  if (!target) return;
+
+  const removeId = target.getAttribute("data-remove-banner-id");
+  if (!removeId) return;
+
+  await removeUploadedBannerImageById(removeId, target);
+});
+
 if (registerCta) registerCta.addEventListener("click", scrollToJoinSection);
 if (topRegisterBtn) topRegisterBtn.addEventListener("click", scrollToJoinSection);
 
