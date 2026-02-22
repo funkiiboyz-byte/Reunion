@@ -95,3 +95,9 @@ Admin panel-এ `Uploaded Banner Images` list-এ প্রতিটি image ro
 - DB image হলে `banner_images` table থেকে delete হবে (approved active admin login দরকার)।
 - Supabase unavailable/local mode হলে local upload list থেকে remove হবে।
 
+
+## New reunion form fields
+Registration form এ batch year, email, payment method, location field যোগ হয়েছে। এগুলো কাজ করাতে latest `supabase_setup.sql` re-run করো যাতে নতুন columns apply হয়।
+
+## Alumni directory (batch-wise)
+Directory section এখন batch অনুযায়ী group করে alumni দেখায় এবং name/batch filter support করে।

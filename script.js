@@ -18,6 +18,14 @@ const successDialog = document.getElementById("successDialog");
 const successDialogText = document.getElementById("successDialogText");
 const successDialogClose = document.getElementById("successDialogClose");
 const adminRegistrationsList = document.getElementById("adminRegistrationsList");
+const directorySearch = document.getElementById("directorySearch");
+const directoryBatchFilter = document.getElementById("directoryBatchFilter");
+const directoryList = document.getElementById("directoryList");
+const countdownTimer = document.getElementById("countdownTimer");
+const guestBookForm = document.getElementById("guestBookForm");
+const guestBookList = document.getElementById("guestBookList");
+const memoryUpload = document.getElementById("memoryUpload");
+const memoryPreview = document.getElementById("memoryPreview");
 
 const heroTitle = document.getElementById("heroTitle");
 const heroDescription = document.getElementById("heroDescription");
@@ -47,6 +55,7 @@ const SETTINGS_KEY = "agc-reunion-admin-settings";
 const SESSION_KEY = "agc-reunion-admin-session";
 const LOCAL_REG_KEY = "agc-reunion-local-registrations";
 const LOCAL_BANNER_UPLOAD_KEY = "agc-reunion-local-banner-uploads";
+const LOCAL_GUESTBOOK_KEY = "agc-reunion-guestbook";
 
 const SUPABASE_URL = "https://urlfmhgurdrernlpuyjj.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVybGZtaGd1cmRyZXJubHB1eWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2ODY4ODgsImV4cCI6MjA4NzI2Mjg4OH0.GZrIbCe207CZ3A7pCmcm5MyhcGqxix-g7S-dsndhhM8";
@@ -299,6 +308,127 @@ async function removeUploadedBannerImageById(id, buttonEl) {
   applySettings(settings);
   setLocalSettings(settings);
   setSyncStatus("Banner image removed", "success");
+}
+
+function getGuestBookRows() {
+  return JSON.parse(localStorage.getItem(LOCAL_GUESTBOOK_KEY) || "[]");
+}
+
+function setGuestBookRows(rows) {
+  localStorage.setItem(LOCAL_GUESTBOOK_KEY, JSON.stringify(rows));
+}
+
+function renderGuestBook() {
+  if (!guestBookList) return;
+  const rows = getGuestBookRows().slice(-20).reverse();
+  if (rows.length === 0) {
+    guestBookList.innerHTML = '<p class="admin-empty">No messages yet.</p>';
+    return;
+  }
+
+  guestBookList.innerHTML = rows
+    .map((row) => `<div class="directory-batch"><strong>${escapeHtml(row.author)}</strong> • Batch ${escapeHtml(row.batch)}<div class="directory-profile">${escapeHtml(row.message)}</div></div>`)
+    .join("");
+}
+
+function startCountdown() {
+  if (!countdownTimer) return;
+  const target = new Date("2026-02-12T10:00:00+06:00").getTime();
+
+  const tick = () => {
+    const now = Date.now();
+    const diff = Math.max(0, target - now);
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const mins = Math.floor((diff / (1000 * 60)) % 60);
+    const secs = Math.floor((diff / 1000) % 60);
+    countdownTimer.textContent = `Reunion starts in ${days}d ${hours}h ${mins}m ${secs}s`;
+  };
+
+  tick();
+  setInterval(tick, 1000);
+}
+
+function renderDirectory(rows) {
+  if (!directoryList) return;
+  if (!rows || rows.length === 0) {
+    directoryList.innerHTML = '<p class="admin-empty">No alumni found.</p>';
+    return;
+  }
+
+  const search = String(directorySearch?.value || "").trim().toLowerCase();
+  const batchFilter = String(directoryBatchFilter?.value || "").trim().toLowerCase();
+
+  const filtered = rows.filter((row) => {
+    const name = String(row.name || "").toLowerCase();
+    const batch = String(row.batch_year || "").toLowerCase();
+    const nameOk = !search || name.includes(search);
+    const batchOk = !batchFilter || batch.includes(batchFilter);
+    return nameOk && batchOk;
+  });
+
+  if (filtered.length === 0) {
+    directoryList.innerHTML = '<p class="admin-empty">No alumni match your search.</p>';
+    return;
+  }
+
+  const grouped = filtered.reduce((acc, row) => {
+    const key = String(row.batch_year || "Unknown");
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(row);
+    return acc;
+  }, {});
+
+  directoryList.innerHTML = Object.keys(grouped)
+    .sort()
+    .map((batch) => {
+      const items = grouped[batch]
+        .map((row) => `<div class="directory-profile"><strong>${escapeHtml(row.name)}</strong> • ${escapeHtml(formatGroupLabel(row.group_name))} • ${escapeHtml(row.profession || "")}${row.location ? ` • ${escapeHtml(row.location)}` : ""}${row.email ? ` • ${escapeHtml(row.email)}` : ""}</div>`)
+        .join("");
+      return `<div class="directory-batch"><strong>Batch ${escapeHtml(batch)}</strong>${items}</div>`;
+    })
+    .join("");
+}
+
+async function refreshAlumniDirectory() {
+  const localRows = getLocalRegistrations();
+  if (!supabaseClient) {
+    renderDirectory(localRows);
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("registrations")
+    .select("name, group_name, profession, batch_year, location, email, created_at")
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (error) {
+    renderDirectory(localRows);
+    return;
+  }
+
+  const merged = [...(data || []), ...localRows];
+  renderDirectory(merged);
+}
+
+function handleMemoryUpload(fileList) {
+  if (!memoryPreview) return;
+  const files = Array.from(fileList || []);
+  if (files.length === 0) {
+    memoryPreview.innerHTML = '<p class="admin-empty">No media uploaded yet.</p>';
+    return;
+  }
+
+  const items = files.slice(0, 12).map((file) => {
+    const url = URL.createObjectURL(file);
+    if (String(file.type || "").startsWith("video/")) {
+      return `<video controls style="width:100%;max-height:220px;border-radius:10px;"><source src="${url}"></video>`;
+    }
+    return `<img src="${url}" alt="memory" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;" />`;
+  });
+
+  memoryPreview.innerHTML = items.join("");
 }
 
 function getLocalRegistrations() {
@@ -802,6 +932,10 @@ if (joinForm) joinForm.addEventListener("submit", async (event) => {
     phone: String(formData.get("phone") || "").trim(),
     group_name: String(formData.get("group") || "").trim(),
     profession: String(formData.get("profession") || "").trim(),
+    batch_year: String(formData.get("batchYear") || "").trim(),
+    email: String(formData.get("email") || "").trim(),
+    payment_method: String(formData.get("payment") || "").trim(),
+    location: String(formData.get("location") || "").trim(),
     comment: String(formData.get("comment") || "").trim(),
   };
 
@@ -823,6 +957,7 @@ if (joinForm) joinForm.addEventListener("submit", async (event) => {
     refreshRegistrationCount();
     refreshRegistrantsTicker();
     refreshAdminRegistrations();
+    refreshAlumniDirectory();
   }
 });
 
@@ -885,11 +1020,36 @@ if (bannerUploadControl) bannerUploadControl.addEventListener("change", async (e
   await handleBannerFileUploads(input.files);
 });
 
+if (directorySearch) directorySearch.addEventListener("input", () => refreshAlumniDirectory());
+if (directoryBatchFilter) directoryBatchFilter.addEventListener("input", () => refreshAlumniDirectory());
+if (guestBookForm) guestBookForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const formData = new FormData(guestBookForm);
+  const rows = getGuestBookRows();
+  rows.push({
+    author: String(formData.get("author") || "").trim(),
+    batch: String(formData.get("batch") || "").trim(),
+    message: String(formData.get("message") || "").trim(),
+    created_at: new Date().toISOString(),
+  });
+  setGuestBookRows(rows);
+  guestBookForm.reset();
+  renderGuestBook();
+});
+if (memoryUpload) memoryUpload.addEventListener("change", (event) => {
+  const input = event.target;
+  if (!(input instanceof HTMLInputElement) || !input.files) return;
+  handleMemoryUpload(input.files);
+});
+
 clearInitialJoinHash();
 initSupabase();
 loadSettings();
 refreshRegistrationCount();
 refreshRegistrantsTicker();
 refreshAdminRegistrations();
+refreshAlumniDirectory();
+renderGuestBook();
+startCountdown();
 setupLiveRealtimeSync();
 setAdminState(sessionStorage.getItem(SESSION_KEY) === "true");
